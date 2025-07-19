@@ -15,4 +15,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.14" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Employees\" />
+    <Folder Include="Views\Drivers\" />
+    <Folder Include="Views\Projects\" />
+    <Folder Include="Views\Shipments\" />
+  </ItemGroup>
+
 </Project>
