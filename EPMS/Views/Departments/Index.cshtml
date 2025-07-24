@@ -1,0 +1,50 @@
+@model IEnumerable<EPMS.DTOs.DepartmentDTO>
+
+@{
+    ViewData["Title"] = "Departments";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Departments</h2>
+            <a class="btn btn-secondary" asp-controller="Admin" asp-action="AdminDashboard">Dashboard</a>
+        </div>
+
+        <div class="mb-4">
+            <!-- Redirects to DepartmentsController -> Create -->
+            <a class="btn btn-dark" asp-controller="Departments" asp-action="Create">Add New Department</a>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Department Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var department in Model)
+            {
+                <tr>
+                    <td>@department.DepartmentId</td>
+                    <td>@department.DepartmentName</td>
+                    <td>
+                        <a class="btn btn-sm btn-warning" asp-controller="Departments" asp-action="Edit" asp-route-id="@department.DepartmentId">Edit</a>
+<a class="btn btn-sm btn-danger" asp-controller="Departments" asp-action="Delete" asp-route-id="@department.DepartmentId">Delete</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
