@@ -1,0 +1,57 @@
+@model IEnumerable<EPMS.DTOs.EmployeeDTO>
+
+@{
+    ViewData["Title"] = "Employees";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Employees</h2>
+            <a class="btn btn-secondary" asp-controller="Admin" asp-action="AdminDashboard">Dashboard</a>
+        </div>
+
+        <div class="mb-4">
+            <!-- Redirects to EmployeesController -> Create -->
+            <a class="btn btn-dark" asp-controller="Employees" asp-action="Create">Add New Employee</a>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Department ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var employee in Model)
+            {
+                <tr>
+                    <td>@employee.EmployeeId</td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+                    <td>@employee.Email</td>
+                    <td>@employee.DepartmentId</td>
+                    <td>
+                        <a class="btn btn-sm btn-info text-white" asp-controller="Employees" asp-action="Details" asp-route-id="@employee.EmployeeId">Details</a>
+                        <a class="btn btn-sm btn-warning" asp-controller="Employees" asp-action="Edit" asp-route-id="@employee.EmployeeId">Edit</a>
+                        <a class="btn btn-sm btn-danger" asp-controller="Employees" asp-action="Delete" asp-route-id="@employee.EmployeeId">Delete</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

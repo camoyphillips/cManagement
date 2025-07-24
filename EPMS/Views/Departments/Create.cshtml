@@ -1,0 +1,37 @@
+@model EPMS.DTOs.DepartmentDTO
+
+@{
+    ViewData["Title"] = "Add New Department";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">@ViewData["Title"]</h2>
+            <a class="btn btn-secondary" asp-controller="Departments" asp-action="Index">Back to Departments</a>
+        </div>
+
+        <form asp-action="Create" method="post" class="card p-4 shadow-sm bg-white rounded">
+            <div class="mb-3">
+                <label asp-for="DepartmentName" class="form-label"></label>
+                <input asp-for="DepartmentName" class="form-control" />
+                <span asp-validation-for="DepartmentName" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Department</button>
+            <a asp-controller="Departments" asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

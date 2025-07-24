@@ -1,0 +1,62 @@
+@model IEnumerable<EPMS.DTOs.EmployeeProjectDTO>
+
+@{
+    ViewData["Title"] = "Project Allocations";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Project Allocations</h2>
+            <a class="btn btn-secondary" asp-controller="Admin" asp-action="AdminDashboard">Dashboard</a>
+        </div>
+
+        <div class="mb-4">
+            <a class="btn btn-dark" asp-controller="ProjectAllocations" asp-action="Create">Assign New Project</a>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Project ID</th>
+                    <th>Project Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var allocation in Model)
+            {
+                <tr>
+                    <td>@allocation.EmployeeId</td>
+                    <td>@allocation.FirstName @allocation.LastName</td>
+                    <td>@allocation.ProjectId</td>
+                    <td>@allocation.ProjectName</td>
+                    <td>
+                        <a class="btn btn-sm btn-warning"
+                           asp-controller="ProjectAllocations"
+                           asp-action="Edit"
+                           asp-route-employeeId="@allocation.EmployeeId"
+                           asp-route-projectId="@allocation.ProjectId">Edit</a>
+
+                        <a class="btn btn-sm btn-danger"
+                           asp-controller="ProjectAllocations"
+                           asp-action="Delete"
+                           asp-route-employeeId="@allocation.EmployeeId"
+                           asp-route-projectId="@allocation.ProjectId">Delete</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
