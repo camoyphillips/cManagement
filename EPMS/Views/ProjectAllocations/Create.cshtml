@@ -1,0 +1,47 @@
+@model EPMS.DTOs.EmployeeProjectCreateDTO
+
+@{
+    ViewData["Title"] = "Add Project Allocation";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Add Project Allocation</h2>
+            <a class="btn btn-secondary" asp-controller="ProjectAllocations" asp-action="Index">Back to List</a>
+        </div>
+
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label for="EmployeeId" class="form-label">Select Employee</label>
+                <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees">
+                    <option value="">-- Select Employee --</option>
+                </select>
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label for="ProjectId" class="form-label">Select Project</label>
+                <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.Projects">
+                    <option value="">-- Select Project --</option>
+                </select>
+                <span asp-validation-for="ProjectId" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Assign</button>
+        </form>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
