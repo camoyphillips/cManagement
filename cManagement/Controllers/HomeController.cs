@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using cShipment.Models;
+using cManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 
-namespace cShipment.Controllers
+namespace cManagement.Controllers
 {
     /// <summary>
     /// Default MVC controller for homepage and error handling.
