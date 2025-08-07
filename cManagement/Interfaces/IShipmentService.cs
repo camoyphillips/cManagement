@@ -1,6 +1,22 @@
-﻿namespace cManagement.Interfaces
+﻿using cManagement.Models;
+using cManagement.Models.Dtos; 
+
+namespace cManagement.Interfaces
 {
-    public class IShipmentService
+    public interface IShipmentService
     {
+        Task<IEnumerable<ShipmentDto>> ListShipments();
+
+        Task<ShipmentDto?> FindShipment(int id);
+
+        Task<ServiceResponse> AddShipment(ShipmentDto shipmentDto);
+
+        Task<ServiceResponse> UpdateShipment(ShipmentDto shipmentDto);
+
+        Task<ServiceResponse> DeleteShipment(int id);
+
+        Task<IEnumerable<ShipmentDto>> ListShipmentsForDriver(int driverId);
+
+        Task<IEnumerable<ShipmentDto>> ListShipmentsForTruck(int truckId);
     }
 }

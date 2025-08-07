@@ -26,7 +26,7 @@ namespace cManagement.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            //Composite key and relationships for EmployeeProject
+            // Composite key and relationships for EmployeeProject
             modelBuilder.Entity<EmployeeProject>()
                 .HasKey(ep => new { ep.EmployeeId, ep.ProjectId });
 
@@ -42,7 +42,7 @@ namespace cManagement.Data
                 .HasForeignKey(ep => ep.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //Composite key and relationships for DriverShipment
+            // Composite key and relationships for DriverShipment
             modelBuilder.Entity<DriverShipment>()
                 .HasKey(ds => new { ds.DriverId, ds.ShipmentId });
 
@@ -64,7 +64,7 @@ namespace cManagement.Data
 
             modelBuilder.Entity<EmployeeShipment>()
                 .HasOne(es => es.Employee)
-                .WithMany(e => (IEnumerable<EmployeeShipment>)e.EmployeeShipments)
+                .WithMany(e => (IEnumerable<EmployeeShipment>)e.EmployeeShipments) 
                 .HasForeignKey(es => es.EmployeeId)
                 .OnDelete(DeleteBehavior.Cascade);
 

@@ -41,5 +41,7 @@ namespace cManagement.Models
         /// </summary>
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
+
+        public object EmployeeShipments { get; internal set; }
     }
 }

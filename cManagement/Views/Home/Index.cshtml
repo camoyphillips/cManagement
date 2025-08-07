@@ -2,7 +2,55 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-5">
+    <h1 class="display-4 fw-bold text-center mb-4">Welcome to <span class="text-primary">cManagement</span></h1>
+    <p class="lead text-center mb-5">
+        Streamline your Management employees, departments, projects, drivers, trucks, and shipments in one powerful dashboard.
+    </p>
+
+    <div class="text-center mb-5">
+        <a href="/swagger" class="btn btn-primary btn-lg me-3">API</a>
+        <a href="/TruckPage/List" class="btn btn-outline-secondary btn-lg">View Dashboard</a>
+    </div>
+
+    <section class="mb-5">
+        <h2 class="h4 mb-3">Core Modules</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped small">
+                <thead class="table-light">
+                    <tr>
+                        <th>Entity</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Drivers</td><td>Manage driver profiles and their assigned shipments</td></tr>
+                    <tr><td>Trucks</td><td>Maintain truck fleet information</td></tr>
+                    <tr><td>Shipments</td><td>Track logistics operations from origin to destination</td></tr>
+                    <tr><td>Employees</td><td>Internal staff managing operations and project participation</td></tr>
+                    <tr><td>Projects</td><td>Company-wide initiatives managed and executed by employees</td></tr>
+                    <tr><td>Departments</td><td>Department-level organization of employees and resources</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="row text-center">
+        <div class="col-md-4">
+            <h3 class="h6 text-uppercase">Assign Shipments</h3>
+            <p class="small">Allocate drivers and trucks to shipment routes with our assignment tools.</p>
+        </div>
+        <div class="col-md-4">
+            <h3 class="h6 text-uppercase">Cost Estimation</h3>
+            <p class="small">Use real-time fuel-aware cost calculations to monitor profitability.</p>
+        </div>
+        <div class="col-md-4">
+            <h3 class="h6 text-uppercase">Live Tracking</h3>
+            <p class="small">Monitor fleet and shipment status live using integrated GPS mapping.</p>
+        </div>
+    </section>
+
+    <div class="mt-5 text-muted small">
+        <p><strong>cManagement</strong> is built using ASP.NET Core, EF Core, SQL Server, and supports scalable modular growth through services and DTO-based APIs.</p>
+    </div>
 </div>

@@ -74,71 +74,6 @@ namespace cManagement.Data.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -224,6 +159,318 @@ namespace cManagement.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("cManagement.Data.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("cManagement.Models.Department", b =>
+                {
+                    b.Property<int>("DepartmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DepartmentId"));
+
+                    b.Property<string>("DepartmentName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("DepartmentId");
+
+                    b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Driver", b =>
+                {
+                    b.Property<int>("DriverId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DriverId"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ContactNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("LicenseNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("DriverId");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("Drivers");
+                });
+
+            modelBuilder.Entity("cManagement.Models.DriverShipment", b =>
+                {
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DriverShipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("DriverId", "ShipmentId");
+
+                    b.HasIndex("ShipmentId");
+
+                    b.ToTable("DriverShipments");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Employee", b =>
+                {
+                    b.Property<int>("EmployeeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("EmployeeId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("cManagement.Models.EmployeeProject", b =>
+                {
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("EmployeeId", "ProjectId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("EmployeeProjects");
+                });
+
+            modelBuilder.Entity("cManagement.Models.EmployeeShipment", b =>
+                {
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("EmployeeId", "ShipmentId");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique();
+
+                    b.HasIndex("ShipmentId");
+
+                    b.ToTable("EmployeeShipments");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Project", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProjectId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ProjectName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ProjectId");
+
+                    b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Shipment", b =>
+                {
+                    b.Property<int>("ShipmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShipmentId"));
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Distance")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("TruckId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ShipmentId");
+
+                    b.HasIndex("TruckId");
+
+                    b.ToTable("Shipments");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Truck", b =>
+                {
+                    b.Property<int>("TruckId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TruckId"));
+
+                    b.Property<int?>("AssignedDriverId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastMaintenanceDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Mileage")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TruckImagePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TruckId");
+
+                    b.HasIndex("AssignedDriverId")
+                        .IsUnique()
+                        .HasFilter("[AssignedDriverId] IS NOT NULL");
+
+                    b.ToTable("Trucks");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -235,7 +482,7 @@ namespace cManagement.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("cManagement.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -244,7 +491,7 @@ namespace cManagement.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("cManagement.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -259,7 +506,7 @@ namespace cManagement.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("cManagement.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -268,11 +515,147 @@ namespace cManagement.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("cManagement.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("cManagement.Models.Driver", b =>
+                {
+                    b.HasOne("cManagement.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("cManagement.Models.DriverShipment", b =>
+                {
+                    b.HasOne("cManagement.Models.Driver", "Driver")
+                        .WithMany("DriverShipments")
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("cManagement.Models.Shipment", "Shipment")
+                        .WithMany("DriverShipments")
+                        .HasForeignKey("ShipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+
+                    b.Navigation("Shipment");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Employee", b =>
+                {
+                    b.HasOne("cManagement.Models.Department", "Department")
+                        .WithMany("Employees")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("cManagement.Models.EmployeeProject", b =>
+                {
+                    b.HasOne("cManagement.Models.Employee", "Employee")
+                        .WithMany("EmployeeProjects")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("cManagement.Models.Project", "Project")
+                        .WithMany("EmployeeProjects")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("cManagement.Models.EmployeeShipment", b =>
+                {
+                    b.HasOne("cManagement.Models.Employee", "Employee")
+                        .WithOne("EmployeeShipments")
+                        .HasForeignKey("cManagement.Models.EmployeeShipment", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("cManagement.Models.Shipment", "Shipment")
+                        .WithMany("EmployeeShipments")
+                        .HasForeignKey("ShipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Shipment");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Shipment", b =>
+                {
+                    b.HasOne("cManagement.Models.Truck", "Truck")
+                        .WithMany("Shipments")
+                        .HasForeignKey("TruckId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Truck");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Truck", b =>
+                {
+                    b.HasOne("cManagement.Models.Driver", "AssignedDriver")
+                        .WithOne("AssignedTruck")
+                        .HasForeignKey("cManagement.Models.Truck", "AssignedDriverId");
+
+                    b.Navigation("AssignedDriver");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Department", b =>
+                {
+                    b.Navigation("Employees");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Driver", b =>
+                {
+                    b.Navigation("AssignedTruck");
+
+                    b.Navigation("DriverShipments");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Employee", b =>
+                {
+                    b.Navigation("EmployeeProjects");
+
+                    b.Navigation("EmployeeShipments")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("cManagement.Models.Project", b =>
+                {
+                    b.Navigation("EmployeeProjects");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Shipment", b =>
+                {
+                    b.Navigation("DriverShipments");
+
+                    b.Navigation("EmployeeShipments");
+                });
+
+            modelBuilder.Entity("cManagement.Models.Truck", b =>
+                {
+                    b.Navigation("Shipments");
                 });
 #pragma warning restore 612, 618
         }
