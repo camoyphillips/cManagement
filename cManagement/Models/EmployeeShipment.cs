@@ -50,6 +50,11 @@ namespace cManagement.Models
         /// Timestamp of when the employee was assigned to the shipment.
         /// </summary>
         public DateTime AssignedOn { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Primary key for the EmployeeShipment join entity.
+        /// </summary>
+        public int EmployeeShipmentId { get; internal set; }
     }
 
     /// <summary>

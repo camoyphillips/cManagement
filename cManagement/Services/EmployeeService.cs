@@ -1,43 +1,126 @@
+using System.Security.Claims;
 using cManagement.Data;
 using cManagement.DTOs;
 using cManagement.Models;
 using cManagement.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace cManagement.Services.Implementations
 {
-    // Service for working with employee data
+    /// <summary>
+    /// Employee service with Identity-backed authorization.
+    /// Roles: "Admin" (full access) and "Employee" (own record only).
+    /// </summary>
     public class EmployeeService : IEmployeeService
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IHttpContextAccessor _http;
 
-        // Constructor that receives the database context
-        public EmployeeService(ApplicationDbContext context)
+        private const string RoleAdmin = "Admin";
+        private const string RoleEmployee = "Employee";
+
+        public EmployeeService(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _userManager = userManager;
+            _http = httpContextAccessor;
         }
 
-        // Get all employees with their department names
+        #region Helpers
+
+        private ClaimsPrincipal? CurrentPrincipal => _http.HttpContext?.User;
+
+        private Task<ApplicationUser?> GetCurrentUserAsync()
+            => _userManager.GetUserAsync(CurrentPrincipal!);
+
+        private async Task<bool> IsInRoleAsync(string role)
+        {
+            var user = await GetCurrentUserAsync();
+            return user != null && await _userManager.IsInRoleAsync(user, role);
+        }
+
+        private Task<bool> IsAdminAsync() => IsInRoleAsync(RoleAdmin);
+        private Task<bool> IsEmployeeAsync() => IsInRoleAsync(RoleEmployee);
+
+        #endregion
+
         public async Task<IEnumerable<EmployeeDTO>> GetAllAsync()
         {
-            return await _context.Employees
-                .Select(e => new EmployeeDTO
-                {
-                    EmployeeId = e.EmployeeId,
-                    FirstName = e.FirstName,
-                    LastName = e.LastName,
-                    Email = e.Email,
-                    DepartmentId = e.DepartmentId,
-                    DepartmentName = e.Department.DepartmentName
-                })
-                .ToListAsync();
+            if (await IsAdminAsync())
+            {
+                return await _context.Employees
+                    .AsNoTracking()
+                    .Include(e => e.Department)
+                    .Select(e => new EmployeeDTO
+                    {
+                        EmployeeId = e.EmployeeId,
+                        FirstName = e.FirstName,
+                        LastName = e.LastName,
+                        Email = e.Email,
+                        DepartmentId = e.DepartmentId,
+                        DepartmentName = e.Department.DepartmentName
+                    })
+                    .ToListAsync();
+            }
+
+            if (await IsEmployeeAsync())
+            {
+                var me = await GetCurrentUserAsync();
+                if (me == null) return Enumerable.Empty<EmployeeDTO>();
+
+                var myRecord = await _context.Employees
+                    .AsNoTracking()
+                    .Include(e => e.Department)
+                    .Where(e => e.ApplicationUserId == me.Id)
+                    .Select(e => new EmployeeDTO
+                    {
+                        EmployeeId = e.EmployeeId,
+                        FirstName = e.FirstName,
+                        LastName = e.LastName,
+                        Email = e.Email,
+                        DepartmentId = e.DepartmentId,
+                        DepartmentName = e.Department.DepartmentName
+                    })
+                    .ToListAsync();
+
+                return myRecord;
+            }
+
+            return Enumerable.Empty<EmployeeDTO>();
         }
 
-        // Get one employee with department and project info (for Details page)
-        public async Task<EmployeeDTO> GetEmployeeDetailsAsync(int id)
+        public async Task<EmployeeDTO?> GetByIdAsync(int id)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.Department)
+                .FirstOrDefaultAsync(e => e.EmployeeId == id);
+
+            if (employee == null) return null;
+
+            if (await IsAdminAsync())
+            {
+                return MapToDTO(employee);
+            }
+
+            if (await IsEmployeeAsync())
+            {
+                var me = await GetCurrentUserAsync();
+                if (me != null && employee.ApplicationUserId == me.Id)
+                {
+                    return MapToDTO(employee);
+                }
+                return null;
+            }
+
+            return null;
+        }
+
+        public async Task<EmployeeDTO?> GetEmployeeDetailsAsync(int id)
         {
             var employee = await _context.Employees
                 .Include(e => e.Department)
@@ -47,93 +130,172 @@ namespace cManagement.Services.Implementations
 
             if (employee == null) return null;
 
-            return new EmployeeDTO
+            if (await IsAdminAsync())
             {
-                EmployeeId = employee.EmployeeId,
-                FirstName = employee.FirstName,
-                LastName = employee.LastName,
-                Email = employee.Email,
-                DepartmentId = employee.DepartmentId,
-                DepartmentName = employee.Department?.DepartmentName,
-                ProjectNames = employee.EmployeeProjects?.Select(ep => ep.Project.ProjectName).ToList()
-            };
+                return MapToDTOWithProjects(employee);
+            }
+
+            if (await IsEmployeeAsync())
+            {
+                var me = await GetCurrentUserAsync();
+                if (me != null && employee.ApplicationUserId == me.Id)
+                {
+                    return MapToDTOWithProjects(employee);
+                }
+                return null;
+            }
+
+            return null;
         }
 
-        // Get employee info for editing (no project info)
-        public async Task<EmployeeCreateEditDTO> GetByIdForEditAsync(int id)
+        public async Task<ServiceResponse> CreateAsync(EmployeeCreateEditDTO dto)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return null;
-
-            return new EmployeeCreateEditDTO
+            if (!await IsAdminAsync())
             {
-                EmployeeId = employee.EmployeeId,
-                FirstName = employee.FirstName,
-                LastName = employee.LastName,
-                Email = employee.Email,
-                DepartmentId = employee.DepartmentId
-            };
-        }
+                return new ServiceResponse
+                {
+                    Status = ServiceResponse.ServiceStatus.Error,
+                    Messages = new List<string> { "Forbidden: You do not have permission to create employees." }
+                };
+            }
 
-        // Add a new employee
-        public async Task CreateAsync(EmployeeCreateEditDTO employeeDto)
-        {
             var employee = new Employee
             {
-                FirstName = employeeDto.FirstName,
-                LastName = employeeDto.LastName,
-                Email = employeeDto.Email,
-                DepartmentId = employeeDto.DepartmentId
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                DepartmentId = dto.DepartmentId
+                // ApplicationUserId = dto.ApplicationUserId; // if linking
             };
 
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
+
+            return new ServiceResponse
+            {
+                Status = ServiceResponse.ServiceStatus.Created,
+                CreatedId = employee.EmployeeId
+            };
         }
 
-        // Update an existing employee
-        public async Task<bool> UpdateAsync(int id, EmployeeCreateEditDTO employeeDto)
+        public async Task<ServiceResponse> UpdateAsync(int id, EmployeeCreateEditDTO dto)
         {
             var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return false;
+            if (employee == null)
+                return new ServiceResponse { Status = ServiceResponse.ServiceStatus.NotFound };
 
-            employee.FirstName = employeeDto.FirstName;
-            employee.LastName = employeeDto.LastName;
-            employee.Email = employeeDto.Email;
-            employee.DepartmentId = employeeDto.DepartmentId;
+            if (!await IsAdminAsync())
+            {
+                if (await IsEmployeeAsync())
+                {
+                    var me = await GetCurrentUserAsync();
+                    if (me == null || employee.ApplicationUserId != me.Id)
+                        return new ServiceResponse
+                        {
+                            Status = ServiceResponse.ServiceStatus.Error,
+                            Messages = new List<string> { "Forbidden: You cannot update this employee." }
+                        };
+                }
+                else
+                {
+                    return new ServiceResponse
+                    {
+                        Status = ServiceResponse.ServiceStatus.Error,
+                        Messages = new List<string> { "Forbidden: You cannot update this employee." }
+                    };
+                }
+            }
+
+            employee.FirstName = dto.FirstName;
+            employee.LastName = dto.LastName;
+            employee.Email = dto.Email;
+            employee.DepartmentId = dto.DepartmentId;
 
             await _context.SaveChangesAsync();
-            return true;
+            return new ServiceResponse { Status = ServiceResponse.ServiceStatus.Updated };
         }
 
-        // Delete an employee by ID
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<ServiceResponse> DeleteAsync(int id)
         {
             var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return false;
+            if (employee == null)
+                return new ServiceResponse { Status = ServiceResponse.ServiceStatus.NotFound };
+
+            if (!await IsAdminAsync())
+            {
+                return new ServiceResponse
+                {
+                    Status = ServiceResponse.ServiceStatus.Error,
+                    Messages = new List<string> { "Forbidden: You cannot delete this employee." }
+                };
+            }
 
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
-            return true;
+            return new ServiceResponse { Status = ServiceResponse.ServiceStatus.Deleted };
         }
 
-        // Get one employee with department info (no project info)
-        public async Task<EmployeeDTO> GetByIdAsync(int id)
+        public async Task<EmployeeDTO?> Profile()
         {
+            if (!await IsEmployeeAsync()) return null;
+
+            var me = await GetCurrentUserAsync();
+            if (me == null) return null;
+
             var employee = await _context.Employees
                 .Include(e => e.Department)
-                .FirstOrDefaultAsync(e => e.EmployeeId == id);
+                .FirstOrDefaultAsync(e => e.ApplicationUserId == me.Id);
 
-            if (employee == null) return null;
-
-            return new EmployeeDTO
-            {
-                EmployeeId = employee.EmployeeId,
-                FirstName = employee.FirstName,
-                LastName = employee.LastName,
-                Email = employee.Email,
-                DepartmentId = employee.DepartmentId,
-                DepartmentName = employee.Department?.DepartmentName
-            };
+            return employee == null ? null : MapToDTO(employee);
         }
+
+        #region Private Mappers
+
+        private static EmployeeDTO MapToDTO(Employee e) =>
+            new EmployeeDTO
+            {
+                EmployeeId = e.EmployeeId,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Email = e.Email,
+                DepartmentId = e.DepartmentId,
+                DepartmentName = e.Department?.DepartmentName
+            };
+
+        private static EmployeeDTO MapToDTOWithProjects(Employee e) =>
+            new EmployeeDTO
+            {
+                EmployeeId = e.EmployeeId,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Email = e.Email,
+                DepartmentId = e.DepartmentId,
+                DepartmentName = e.Department?.DepartmentName,
+                ProjectNames = e.EmployeeProjects?
+                    .Select(ep => ep.Project.ProjectName)
+                    .ToList()
+            };
+
+        public Task<EmployeeCreateEditDTO> GetByIdForEditAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IEmployeeService.CreateAsync(EmployeeCreateEditDTO employeeDto)
+        {
+            return CreateAsync(employeeDto);
+        }
+
+        Task<bool> IEmployeeService.UpdateAsync(int id, EmployeeCreateEditDTO employeeDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<bool> IEmployeeService.DeleteAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

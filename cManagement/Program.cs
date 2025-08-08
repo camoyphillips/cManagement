@@ -10,7 +10,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Database
+// -----------------------------
+// Database
+// -----------------------------
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -19,15 +21,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Identity with ApplicationUser
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = true;
-})
-.AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<ApplicationDbContext>();
+// -----------------------------
+// Identity (with Roles)
+// -----------------------------
+builder.Services
+    .AddDefaultIdentity<ApplicationUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        // optional safety: options.Password.RequiredLength = 6; etc.
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Dependency Injection for custom services
+// Access HttpContext in services (for role checks, current user, etc.)
+builder.Services.AddHttpContextAccessor();
+
+// -----------------------------
+// Dependency Injection - Services
+// -----------------------------
 builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<ITruckService, TruckService>();
 builder.Services.AddScoped<IShipmentService, ShipmentService>();
@@ -35,7 +46,9 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
-// MVC, Razor Pages, and Swagger
+// -----------------------------
+// MVC, Razor, Swagger
+// -----------------------------
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
@@ -46,21 +59,23 @@ builder.Services.AddSwaggerGen(c =>
         Title = "cManagement API",
         Version = "v1"
     });
+    // If you later add auth to Swagger UI, wire security here.
 });
 
 var app = builder.Build();
 
-// Configure HTTP Pipeline
+// -----------------------------
+// HTTP Pipeline
+// -----------------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
 
-    // Enable Swagger in development
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "cManagement API v1");
-        c.RoutePrefix = "swagger"; // Navigate to /swagger
+        c.RoutePrefix = "swagger"; // browse at /swagger
     });
 }
 else
@@ -77,7 +92,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Endpoint Routing
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

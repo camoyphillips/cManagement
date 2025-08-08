@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using cManagement.Data;
 
 namespace cManagement.Models
 {
@@ -43,5 +44,8 @@ namespace cManagement.Models
         public string FullName => $"{FirstName} {LastName}";
 
         public object EmployeeShipments { get; internal set; }
+        public string ApplicationUserId { get; internal set; }
+        public ApplicationUser? ApplicationUser { get; set; }
+
     }
 }
