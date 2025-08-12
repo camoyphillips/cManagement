@@ -14,38 +14,34 @@ namespace cManagement.Models
         public int EmployeeId { get; set; }
 
         [Required, MaxLength(50)]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         [Required, MaxLength(50)]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
         [Required, MaxLength(100), EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Foreign key to the Department.
-        /// </summary>
+        /// <summary>Foreign key to the Department.</summary>
         public int DepartmentId { get; set; }
 
-        /// <summary>
-        /// Navigation property to the employee's department.
-        /// </summary>
-        public Department Department { get; set; }
+        /// <summary>Navigation property to the employee's department.</summary>
+        public Department? Department { get; set; }
 
-        /// <summary>
-        /// Many-to-many relationship with projects.
-        /// </summary>
+        /// <summary>Many-to-many relationship with projects.</summary>
         public List<EmployeeProject> EmployeeProjects { get; set; } = new();
 
-        /// <summary>
-        /// Display-only property for full name.
-        /// </summary>
+        /// <summary>One employee ↔ many shipments (through join).</summary>
+        public ICollection<EmployeeShipment> EmployeeShipments { get; set; } = new List<EmployeeShipment>();
+
+        /// <summary>Display-only property for full name.</summary>
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
 
-        public object EmployeeShipments { get; internal set; }
-        public string ApplicationUserId { get; internal set; }
-        public ApplicationUser? ApplicationUser { get; set; }
+        /// <summary>Required link to AspNetUsers.Id (nvarchar).</summary>
+        [Required]
+        public string ApplicationUserId { get; set; } = string.Empty;
 
+        public ApplicationUser? ApplicationUser { get; set; }
     }
 }

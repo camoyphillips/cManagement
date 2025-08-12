@@ -255,7 +255,7 @@ namespace cManagement.Controllers
             }
             catch (Exception ex)
             {
-                // TODO: Log the exception (e.g., using ILogger)
+                // TODO: Log the exception 
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred during file upload or database update for truck ID {id}: {ex.Message}");
             }
         }

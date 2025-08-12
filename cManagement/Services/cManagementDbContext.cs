@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace cManagement.Services.Implementations
 {
-    // This DbContext is likely meant to mirror ApplicationDbContext — you can rename or merge it if needed
     public class cManagementDbContext : IdentityDbContext<ApplicationUser>
     {
         public cManagementDbContext(DbContextOptions<cManagementDbContext> options)

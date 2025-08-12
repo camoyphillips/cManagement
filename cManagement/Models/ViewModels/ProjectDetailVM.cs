@@ -11,7 +11,7 @@ namespace cManagement.Models.ViewModels
     public class ProjectDetailVM
     {
         public ProjectDto Project { get; set; } = null!;
-        public List<EmployeeDto> AssignedEmployees { get; set; } = new();
+        public List<EmployeeDTO> AssignedEmployees { get; set; } = new();
         public List<ShipmentDto> RelatedShipments { get; set; } = new();
     }
 }

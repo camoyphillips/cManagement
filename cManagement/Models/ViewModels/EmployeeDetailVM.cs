@@ -1,5 +1,6 @@
 ﻿using cManagement.DTOs;
 using cManagement.Models.Dtos;
+using cManagement.ViewModels;
 using System.Collections.Generic;
 
 namespace cManagement.Models.ViewModels

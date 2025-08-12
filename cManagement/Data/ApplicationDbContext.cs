@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using cManagement.Data;
 using cManagement.Models;
 
 namespace cManagement.Data
@@ -26,7 +27,50 @@ namespace cManagement.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Composite key and relationships for EmployeeProject
+            // Employee  Identity user (AspNetUsers)
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.ApplicationUserId)
+                .IsRequired();
+
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.ApplicationUser)
+                .WithMany()
+                .HasForeignKey(e => e.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Driver  Identity user (AspNetUsers)
+            modelBuilder.Entity<Driver>()
+                .Property(d => d.ApplicationUserId)
+                .IsRequired();
+
+            modelBuilder.Entity<Driver>()
+                .HasOne(d => d.ApplicationUser)
+                .WithMany()
+                .HasForeignKey(d => d.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Driver  optional Truck
+            modelBuilder.Entity<Driver>()
+                .HasOne(d => d.AssignedTruck)
+                .WithMany()
+                .HasForeignKey(d => d.AssignedTruckId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Shipment  Truck (required)
+            modelBuilder.Entity<Shipment>()
+                .HasOne(s => s.Truck)
+                .WithMany()
+                .HasForeignKey(s => s.TruckId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Department  Employees (1-M)
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.Department)
+                .WithMany(d => d.Employees)
+                .HasForeignKey(e => e.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // EmployeeProject (many-to-many via explicit join)
             modelBuilder.Entity<EmployeeProject>()
                 .HasKey(ep => new { ep.EmployeeId, ep.ProjectId });
 
@@ -42,9 +86,33 @@ namespace cManagement.Data
                 .HasForeignKey(ep => ep.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Composite key and relationships for DriverShipment
+            // EmployeeShipment (composite PK per your table)
+            modelBuilder.Entity<EmployeeShipment>()
+                .HasKey(es => new { es.EmployeeId, es.ShipmentId });
+
+            modelBuilder.Entity<EmployeeShipment>()
+                .Property(es => es.Status)
+                .HasConversion<int>(); 
+
+            modelBuilder.Entity<EmployeeShipment>()
+                .HasOne(es => es.Employee)
+                .WithMany(e => e.EmployeeShipments)
+                .HasForeignKey(es => es.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EmployeeShipment>()
+                .HasOne(es => es.Shipment)
+                .WithMany(s => s.EmployeeShipments)
+                .HasForeignKey(es => es.ShipmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // DriverShipment (separate PK column DriverShipmentId)
             modelBuilder.Entity<DriverShipment>()
-                .HasKey(ds => new { ds.DriverId, ds.ShipmentId });
+                .HasKey(ds => ds.DriverShipmentId);
+
+            modelBuilder.Entity<DriverShipment>()
+                .Property(ds => ds.DriverShipmentId)
+                .ValueGeneratedNever();
 
             modelBuilder.Entity<DriverShipment>()
                 .HasOne(ds => ds.Driver)
@@ -56,22 +124,6 @@ namespace cManagement.Data
                 .HasOne(ds => ds.Shipment)
                 .WithMany(s => s.DriverShipments)
                 .HasForeignKey(ds => ds.ShipmentId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Composite key and relationships for EmployeeShipment
-            modelBuilder.Entity<EmployeeShipment>()
-                .HasKey(es => new { es.EmployeeId, es.ShipmentId });
-
-            modelBuilder.Entity<EmployeeShipment>()
-                .HasOne(es => es.Employee)
-                .WithMany(e => (IEnumerable<EmployeeShipment>)e.EmployeeShipments) 
-                .HasForeignKey(es => es.EmployeeId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<EmployeeShipment>()
-                .HasOne(es => es.Shipment)
-                .WithMany(s => s.EmployeeShipments)
-                .HasForeignKey(es => es.ShipmentId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

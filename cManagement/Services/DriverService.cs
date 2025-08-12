@@ -74,7 +74,7 @@ namespace cManagement.Services
                 // or replace this with your own mapping logic (e.g., by email).
                 var mine = await _context.Drivers
                     .AsNoTracking()
-                    .Where(d => d.ApplicationUserId == me.Id) // <-- requires FK
+                    .Where(d => d.ApplicationUserId == me.Id) 
                     .Select(d => new DriverDto
                     {
                         DriverId = d.DriverId,

@@ -8,7 +8,7 @@ namespace cManagement.Controllers
 {
     // This makes the controller return JSON instead of views
     [ApiController]
-    // This sets the base route: /api/ProjectAllocationsApi
+    // This sets the base route: 
     [Route("api/[controller]")]
     public class ProjectAllocationsApiController : ControllerBase
     {

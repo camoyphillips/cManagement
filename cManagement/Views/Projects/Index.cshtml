@@ -40,6 +40,7 @@
                     <td>@project.ProjectName</td>
                     <td>@project.Description</td>
                     <td>
+                        <a class="btn btn-sm btn-warning" asp-controller="Projects" asp-action="List" asp-route-id="@project.ProjectId">List</a>
                         <a class="btn btn-sm btn-warning" asp-controller="Projects" asp-action="Edit" asp-route-id="@project.ProjectId">Edit</a>
                         <a class="btn btn-sm btn-danger" asp-controller="Projects" asp-action="Delete" asp-route-id="@project.ProjectId">Delete</a>
                     </td>

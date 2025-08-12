@@ -2,30 +2,15 @@
 using cManagement.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
 
 namespace cManagement.Controllers
 {
     /// <summary>
     /// Handles web requests for Shipment-related operations, including CRUD and related listings.
     /// </summary>
-    public class ShipmentPageController : Controller
+    public class ShipmentPageController(IShipmentService shipmentService) : Controller
     {
-        private readonly IShipmentService _shipmentService;
-        // You might need a TruckService here if you plan to populate truck dropdowns
-        // private readonly ITruckService _truckService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ShipmentPageController"/> class.
-        /// </summary>
-        /// <param name="shipmentService">The service for managing shipment data.</param>
-        /// <param name="truckService">The service for managing truck data (optional, uncomment if needed for dropdowns).</param>
-        public ShipmentPageController(IShipmentService shipmentService /*, ITruckService truckService */)
-        {
-            _shipmentService = shipmentService;
-            // _truckService = truckService;
-        }
-
-        // --- READ Operations ---
 
         /// <summary>
         /// Displays a list of all shipments.
@@ -33,7 +18,7 @@ namespace cManagement.Controllers
         /// <returns>The view displaying the list of shipments.</returns>
         public async Task<IActionResult> List()
         {
-            var shipments = await _shipmentService.ListShipments();
+            var shipments = await shipmentService.ListShipments();
             return View(shipments);
         }
 
@@ -44,7 +29,7 @@ namespace cManagement.Controllers
         /// <returns>The view displaying shipment details, or redirects to list if not found.</returns>
         public async Task<IActionResult> Details(int id)
         {
-            var shipment = await _shipmentService.FindShipment(id);
+            var shipment = await shipmentService.FindShipment(id);
             if (shipment == null)
             {
                 TempData["ErrorMessage"] = "Shipment not found.";
@@ -53,18 +38,16 @@ namespace cManagement.Controllers
             return View(shipment);
         }
 
-        // --- CREATE Operation ---
-
         /// <summary>
         /// Displays the form for creating a new shipment.
         /// </summary>
         /// <returns>The view with the new shipment form.</returns>
-        public async Task<IActionResult> New()
+        public IActionResult New()
         {
             // Example of populating a dropdown for TruckId if needed:
             // var trucks = await _truckService.ListTrucks();
-            // ViewBag.Trucks = new SelectList(trucks, "TruckId", "Model");
-            return View(new ShipmentDto()); // Pass an empty DTO for form binding
+            // ViewBag.Trucks = new SelectList;
+            return View(new ShipmentDto()); 
         }
 
         /// <summary>
@@ -80,11 +63,11 @@ namespace cManagement.Controllers
             {
                 // Re-populate ViewBag.Trucks if you're using a dropdown
                 // var trucks = await _truckService.ListTrucks();
-                // ViewBag.Trucks = new SelectList(trucks, "TruckId", "Model", shipmentDto.TruckId);
+                // ViewBag.Trucks = new SelectList;
                 return View("New", shipmentDto);
             }
 
-            var response = await _shipmentService.AddShipment(shipmentDto);
+            var response = await shipmentService.AddShipment(shipmentDto);
 
             if (response.Status == Models.ServiceResponse.ServiceStatus.Created)
             {
@@ -94,14 +77,11 @@ namespace cManagement.Controllers
             else
             {
                 TempData["ErrorMessage"] = "Error adding shipment.";
-                // Re-populate ViewBag.Trucks if you're using a dropdown
                 // var trucks = await _truckService.ListTrucks();
-                // ViewBag.Trucks = new SelectList(trucks, "TruckId", "Model", shipmentDto.TruckId);
+                // ViewBag.Trucks = new SelectList;
                 return View("New", shipmentDto);
             }
         }
-
-        // --- UPDATE Operation ---
 
         /// <summary>
         /// Displays the form for editing an existing shipment.
@@ -110,16 +90,15 @@ namespace cManagement.Controllers
         /// <returns>The view with the edit shipment form, or redirects to list if not found.</returns>
         public async Task<IActionResult> Edit(int id)
         {
-            var shipment = await _shipmentService.FindShipment(id);
+            var shipment = await shipmentService.FindShipment(id);
             if (shipment == null)
             {
                 TempData["ErrorMessage"] = "Shipment not found for editing.";
                 return RedirectToAction(nameof(List));
             }
 
-            // Example of populating a dropdown for TruckId if needed:
             // var trucks = await _truckService.ListTrucks();
-            // ViewBag.Trucks = new SelectList(trucks, "TruckId", "Model", shipment.TruckId);
+            // ViewBag.Trucks = new SelectList;
             return View(shipment);
         }
 
@@ -141,13 +120,12 @@ namespace cManagement.Controllers
 
             if (!ModelState.IsValid)
             {
-                // Re-populate ViewBag.Trucks if you're using a dropdown
                 // var trucks = await _truckService.ListTrucks();
-                // ViewBag.Trucks = new SelectList(trucks, "TruckId", "Model", shipmentDto.TruckId);
+                // ViewBag.Trucks = new SelectList;
                 return View("Edit", shipmentDto);
             }
 
-            var response = await _shipmentService.UpdateShipment(shipmentDto);
+            var response = await shipmentService.UpdateShipment(shipmentDto);
 
             if (response.Status == Models.ServiceResponse.ServiceStatus.Updated)
             {
@@ -162,14 +140,12 @@ namespace cManagement.Controllers
             else
             {
                 TempData["ErrorMessage"] = "Error updating shipment.";
-                // Re-populate ViewBag.Trucks if you're using a dropdown
                 // var trucks = await _truckService.ListTrucks();
-                // ViewBag.Trucks = new SelectList(trucks, "TruckId", "Model", shipmentDto.TruckId);
+                // ViewBag.Trucks = new SelectList;
                 return View("Edit", shipmentDto);
             }
         }
 
-        // --- DELETE Operations ---
 
         /// <summary>
         /// Displays a confirmation page before deleting a shipment.
@@ -178,7 +154,7 @@ namespace cManagement.Controllers
         /// <returns>The view displaying the delete confirmation, or redirects to list if not found.</returns>
         public async Task<IActionResult> ConfirmDelete(int id)
         {
-            var shipment = await _shipmentService.FindShipment(id);
+            var shipment = await shipmentService.FindShipment(id);
             if (shipment == null)
             {
                 TempData["ErrorMessage"] = "Shipment not found for deletion.";
@@ -192,11 +168,11 @@ namespace cManagement.Controllers
         /// </summary>
         /// <param name="id">The unique identifier of the shipment to delete.</param>
         /// <returns>Redirects to the shipment list.</returns>
-        [HttpPost, ActionName("Delete")] // ActionName allows the POST method to be named "DeleteConfirmed" while the URL is /Delete
+        [HttpPost, ActionName("Delete")] 
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var response = await _shipmentService.DeleteShipment(id);
+            var response = await shipmentService.DeleteShipment(id);
 
             if (response.Status == Models.ServiceResponse.ServiceStatus.Deleted)
             {
@@ -214,7 +190,6 @@ namespace cManagement.Controllers
             return RedirectToAction(nameof(List));
         }
 
-        // --- Related Methods (Examples) ---
 
         /// <summary>
         /// Displays a list of shipments assigned to a specific truck.
@@ -223,9 +198,9 @@ namespace cManagement.Controllers
         /// <returns>The view displaying shipments for the specified truck.</returns>
         public async Task<IActionResult> ShipmentsForTruck(int truckId)
         {
-            var shipments = await _shipmentService.ListShipmentsForTruck(truckId);
-            ViewData["TruckId"] = truckId; // Pass truck ID to view if needed
-            return View(shipments); // Assumes you have a ShipmentsForTruck.cshtml view
+            var shipments = await shipmentService.ListShipmentsForTruck(truckId);
+            ViewData["TruckId"] = truckId; 
+            return View(shipments); 
         }
 
         /// <summary>
@@ -235,9 +210,9 @@ namespace cManagement.Controllers
         /// <returns>The view displaying shipments for the specified driver.</returns>
         public async Task<IActionResult> ShipmentsForDriver(int driverId)
         {
-            var shipments = await _shipmentService.ListShipmentsForDriver(driverId);
-            ViewData["DriverId"] = driverId; // Pass driver ID to view if needed
-            return View(shipments); // Assumes you have a ShipmentsForDriver.cshtml view
+            var shipments = await shipmentService.ListShipmentsForDriver(driverId);
+            ViewData["DriverId"] = driverId; 
+            return View(shipments);
         }
     }
 }

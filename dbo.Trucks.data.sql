@@ -1,28 +1,55 @@
-﻿-- Insert truck records using DriverId 26–49
-INSERT INTO dbo.Trucks (Model, Mileage, LastMaintenanceDate, AssignedDriverId)
-VALUES
-    ('Volvo VNL', 95000, '2024-06-01', 26),
-    ('Freightliner Cascadia', 96000, '2024-06-04', 27),
-    ('Kenworth T680', 97000, '2024-06-07', 28),
-    ('Peterbilt 579', 98000, '2024-06-10', 29),
-    ('Mack Anthem', 99000, '2024-06-13', 30),
-    ('Volvo VNR', 100000, '2024-06-16', 31),
-    ('Freightliner M2', 101000, '2024-06-19', 32),
-    ('Kenworth W990', 102000, '2024-06-22', 33),
-    ('Peterbilt 389', 103000, '2024-06-25', 34),
-    ('Mack Pinnacle', 104000, '2024-06-28', 35),
-    ('International LT', 105000, '2024-07-01', 36),
-    ('Western Star 5700XE', 106000, '2024-07-04', 37),
-    ('Volvo VNX', 107000, '2024-07-07', 38),
-    ('Freightliner 122SD', 108000, '2024-07-10', 39),
-    ('Kenworth T880', 109000, '2024-07-13', 40),
-    ('Peterbilt 567', 110000, '2024-07-16', 41),
-    ('Mack Granite', 111000, '2024-07-19', 42),
-    ('Volvo VAH', 112000, '2024-07-22', 43),
-    ('Freightliner SD114', 113000, '2024-07-25', 44),
-    ('Kenworth C500', 114000, '2024-07-28', 45),
-    ('Peterbilt 348', 115000, '2024-07-31', 46),
-    ('Mack TerraPro', 116000, '2024-08-03', 47),
-    ('Volvo FE', 117000, '2024-08-06', 48),
-    ('Freightliner FLD120', 118000, '2024-08-09', 49)
-;
+﻿SET XACT_ABORT ON;
+BEGIN TRY
+BEGIN TRAN;
+
+
+DECLARE @Seed TABLE
+(
+    Model NVARCHAR(MAX) NOT NULL,
+    Mileage INT NOT NULL,
+    LastMaintenanceDate DATETIME2 NOT NULL,
+    TruckImagePath NVARCHAR(MAX) NULL
+);
+
+INSERT INTO @Seed (Model, Mileage, LastMaintenanceDate, TruckImagePath) VALUES
+(N'Volvo VNL 760',         125000, '2025-06-15', NULL),
+(N'Freightliner Cascadia',  98000, '2025-05-20', NULL),
+(N'Kenworth T680',         142500, '2025-04-30', NULL),
+(N'Peterbilt 579',         201000, '2025-03-25', NULL),
+(N'Mack Anthem',            67500, '2025-07-10', NULL),
+(N'Volvo VNR 300',          45000, '2025-08-01', NULL),
+(N'Freightliner M2 106',   112000, '2025-02-18', NULL),
+(N'Hino 338',              131000, '2025-01-12', NULL);
+
+;WITH s AS (
+    SELECT *, ROW_NUMBER() OVER (ORDER BY Model) AS rn
+    FROM @Seed
+),
+d AS (
+    SELECT DriverId, ROW_NUMBER() OVER (ORDER BY DriverId) AS rn
+    FROM dbo.Drivers
+)
+INSERT INTO dbo.Trucks (Model, Mileage, LastMaintenanceDate, TruckImagePath, AssignedDriverId)
+SELECT 
+    s.Model,
+    s.Mileage,
+    s.LastMaintenanceDate,
+    s.TruckImagePath,
+    d.DriverId   
+FROM s
+LEFT JOIN d ON d.rn = s.rn
+WHERE NOT EXISTS (
+    SELECT 1 FROM dbo.Trucks t WHERE t.Model = s.Model
+);
+
+COMMIT;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK;
+    PRINT 'Truck seed failed: ' + ERROR_MESSAGE();
+END CATCH;
+
+-- Peek
+SELECT TOP 10 TruckId, Model, Mileage, LastMaintenanceDate, TruckImagePath, AssignedDriverId
+FROM dbo.Trucks
+ORDER BY TruckId;

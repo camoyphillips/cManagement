@@ -32,7 +32,6 @@ namespace cManagement.Controllers
         }
 
         // POST: /Projects/Create
-        // Saves the new project after form is submitted
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProjectDTO projectDto)

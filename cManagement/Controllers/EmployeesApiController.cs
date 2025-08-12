@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace cManagement.Controllers
 {
-    // This controller handles API requests (returns JSON instead of views)
+    // This controller handles API requests 
     [ApiController]
-    [Route("api/[controller]")] // Route will be: /api/EmployeesApi
+    [Route("api/[controller]")] 
     public class EmployeesApiController : ControllerBase
     {
         // Service for handling employee operations

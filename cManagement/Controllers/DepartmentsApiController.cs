@@ -8,11 +8,11 @@ namespace cManagement.Controllers
 {
     [ApiController]
 
-    // This sets the route for this controller: /api/DepartmentsApi
+    // This sets the route for this controller: 
     [Route("api/[controller]")]
     public class DepartmentsApiController : ControllerBase
     {
-        // This is a reference to a service that handles department data (like get, add, update, delete)
+        // This is a reference to a service that handles department data.
         private readonly IDepartmentService _departmentService;
 
         // Constructor to inject the department service
@@ -35,7 +35,7 @@ namespace cManagement.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DepartmentDTO>> GetById(int id)
         {
-            var department = await _departmentService.GetByIdAsync(id); // Find department by ID
+            var department = await _departmentService.GetByIdAsync(id); 
             if (department == null)
                 return NotFound(); 
 
@@ -47,7 +47,7 @@ namespace cManagement.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(DepartmentDTO dto)
         {
-            await _departmentService.CreateAsync(dto); // Save new department
+            await _departmentService.CreateAsync(dto); 
             return CreatedAtAction(nameof(GetById), new { id = dto.DepartmentId }, dto);
         }
 

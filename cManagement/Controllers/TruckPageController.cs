@@ -19,7 +19,7 @@ namespace cManagement.Controllers
     /// including listing, viewing details, adding, editing, and deleting trucks.
     /// It interacts with service layers for data operations.
     /// </summary>
-    public class TruckPageController(ITruckService truckService) : Controller // Primary constructor used here
+    public class TruckPageController(ITruckService truckService) : Controller 
     {
         private readonly ITruckService _truckService = truckService;
 
@@ -76,20 +76,14 @@ namespace cManagement.Controllers
                     // If truck not found, return an error view with a specific message
                     return View("Error", new ErrorViewModel
                     {
-                        Messages = { $"Truck with ID {id} not found." } // Simplified collection initialization
+                        Messages = { $"Truck with ID {id} not found." } 
                     });
                 }
 
-                // IMPORTANT: The 'Details.cshtml' view should now expect a 'TruckDto' directly.
-                // It will no longer have direct access to AssignedDriver (as a separate object),
-                // ActiveShipments, or MaintenanceLogs collections through this model.
-                // If those are needed, either update the TruckDto to include them,
-                // or revert to a more complex ViewModel (e.g., TruckDetails) and fetch them here.
                 return View("Details", truck);
             }
             catch (Exception ex)
             {
-                // TODO: Log the exception
                 // Console.WriteLine($"Error retrieving truck details for ID {id}: {ex.Message}");
                 return View("Error", new ErrorViewModel { Messages = { $"An error occurred while loading details for truck ID {id}.", ex.Message } }); // Simplified collection initialization
             }
@@ -118,7 +112,7 @@ namespace cManagement.Controllers
             if (!ModelState.IsValid)
             {
                 // If model validation fails, return the view with validation errors
-                return View("New", truckDto); // Pass the DTO back to the view to retain input
+                return View("New", truckDto); 
             }
 
             try

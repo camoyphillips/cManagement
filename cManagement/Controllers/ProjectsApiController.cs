@@ -8,7 +8,7 @@ namespace cManagement.Controllers
 {
     // This makes the controller an API 
     [ApiController]
-    // Sets the base route to: /api/ProjectsApi
+    // Sets the base route to: 
     [Route("api/[controller]")]
     public class ProjectsApiController : ControllerBase
     {
@@ -27,7 +27,7 @@ namespace cManagement.Controllers
         public async Task<ActionResult<IEnumerable<ProjectDTO>>> GetAll()
         {
             var projects = await _projectService.GetAllAsync();
-            return Ok(projects); // HTTP 200 OK with the list
+            return Ok(projects); 
         }
 
         // GET: api/ProjectsApi/5
@@ -37,9 +37,9 @@ namespace cManagement.Controllers
         {
             var project = await _projectService.GetByIdAsync(id);
             if (project == null)
-                return NotFound(); // HTTP 404 if not found
+                return NotFound(); 
 
-            return Ok(project); // HTTP 200 OK with the project
+            return Ok(project); 
         }
 
         // POST: api/ProjectsApi
@@ -58,13 +58,13 @@ namespace cManagement.Controllers
         public async Task<IActionResult> Update(int id, ProjectDTO dto)
         {
             if (id != dto.ProjectId)
-                return BadRequest(); // HTTP 400 if IDs don’t match
+                return BadRequest(); 
 
             var updated = await _projectService.UpdateAsync(id, dto);
             if (!updated)
-                return NotFound(); // HTTP 404 if project not found
+                return NotFound(); 
 
-            return NoContent(); // HTTP 204 success with no content
+            return NoContent(); 
         }
 
         // DELETE: api/ProjectsApi/5
@@ -74,9 +74,9 @@ namespace cManagement.Controllers
         {
             var deleted = await _projectService.DeleteAsync(id);
             if (!deleted)
-                return NotFound(); // HTTP 404 if project not found
+                return NotFound(); 
 
-            return NoContent(); // HTTP 204 after successful delete
+            return NoContent(); 
         }
     }
 }

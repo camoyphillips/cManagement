@@ -12,7 +12,7 @@ namespace cManagement.Models.Dtos
         /// <summary>
         /// Gets or sets the unique identifier for the driver. Nullable for new drivers, non-nullable for existing.
         /// </summary>
-        public int DriverId { get; set; } // Changed to int
+        public int DriverId { get; set; } 
 
         /// <summary>
         /// Gets or sets the full name of the driver. Required.

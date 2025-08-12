@@ -254,6 +254,12 @@ namespace cManagement.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("ApplicationUserId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("AssignedTruckId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ContactNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -272,28 +278,34 @@ namespace cManagement.Data.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
+                    b.HasIndex("ApplicationUserId1");
+
+                    b.HasIndex("AssignedTruckId");
+
                     b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("cManagement.Models.DriverShipment", b =>
                 {
-                    b.Property<int>("DriverId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ShipmentId")
+                    b.Property<int>("DriverShipmentId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AssignedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DriverShipmentId")
+                    b.Property<int>("DriverId")
                         .HasColumnType("int");
 
                     b.Property<string>("Role")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("DriverId", "ShipmentId");
+                    b.Property<int>("ShipmentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DriverShipmentId");
+
+                    b.HasIndex("DriverId");
 
                     b.HasIndex("ShipmentId");
 
@@ -310,6 +322,9 @@ namespace cManagement.Data.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ApplicationUserId1")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("DepartmentId")
@@ -333,6 +348,8 @@ namespace cManagement.Data.Migrations
                     b.HasKey("EmployeeId");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("ApplicationUserId1");
 
                     b.HasIndex("DepartmentId");
 
@@ -368,17 +385,17 @@ namespace cManagement.Data.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("EmployeeShipmentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Role")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("EmployeeId", "ShipmentId");
-
-                    b.HasIndex("EmployeeId")
-                        .IsUnique();
 
                     b.HasIndex("ShipmentId");
 
@@ -416,6 +433,9 @@ namespace cManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShipmentId"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Destination")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -437,9 +457,16 @@ namespace cManagement.Data.Migrations
                     b.Property<int>("TruckId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TruckId1")
+                        .HasColumnType("int");
+
                     b.HasKey("ShipmentId");
 
+                    b.HasIndex("ApplicationUserId");
+
                     b.HasIndex("TruckId");
+
+                    b.HasIndex("TruckId1");
 
                     b.ToTable("Shipments");
                 });
@@ -470,9 +497,7 @@ namespace cManagement.Data.Migrations
 
                     b.HasKey("TruckId");
 
-                    b.HasIndex("AssignedDriverId")
-                        .IsUnique()
-                        .HasFilter("[AssignedDriverId] IS NOT NULL");
+                    b.HasIndex("AssignedDriverId");
 
                     b.ToTable("Trucks");
                 });
@@ -533,10 +558,21 @@ namespace cManagement.Data.Migrations
                     b.HasOne("cManagement.Data.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("cManagement.Data.ApplicationUser", null)
+                        .WithMany("Drivers")
+                        .HasForeignKey("ApplicationUserId1");
+
+                    b.HasOne("cManagement.Models.Truck", "AssignedTruck")
+                        .WithMany()
+                        .HasForeignKey("AssignedTruckId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("ApplicationUser");
+
+                    b.Navigation("AssignedTruck");
                 });
 
             modelBuilder.Entity("cManagement.Models.DriverShipment", b =>
@@ -563,13 +599,17 @@ namespace cManagement.Data.Migrations
                     b.HasOne("cManagement.Data.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("cManagement.Data.ApplicationUser", null)
+                        .WithMany("Employees")
+                        .HasForeignKey("ApplicationUserId1");
 
                     b.HasOne("cManagement.Models.Department", "Department")
                         .WithMany("Employees")
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
@@ -599,8 +639,8 @@ namespace cManagement.Data.Migrations
             modelBuilder.Entity("cManagement.Models.EmployeeShipment", b =>
                 {
                     b.HasOne("cManagement.Models.Employee", "Employee")
-                        .WithOne("EmployeeShipments")
-                        .HasForeignKey("cManagement.Models.EmployeeShipment", "EmployeeId")
+                        .WithMany("EmployeeShipments")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -617,11 +657,19 @@ namespace cManagement.Data.Migrations
 
             modelBuilder.Entity("cManagement.Models.Shipment", b =>
                 {
-                    b.HasOne("cManagement.Models.Truck", "Truck")
+                    b.HasOne("cManagement.Data.ApplicationUser", null)
                         .WithMany("Shipments")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("cManagement.Models.Truck", "Truck")
+                        .WithMany()
                         .HasForeignKey("TruckId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("cManagement.Models.Truck", null)
+                        .WithMany("Shipments")
+                        .HasForeignKey("TruckId1");
 
                     b.Navigation("Truck");
                 });
@@ -629,10 +677,19 @@ namespace cManagement.Data.Migrations
             modelBuilder.Entity("cManagement.Models.Truck", b =>
                 {
                     b.HasOne("cManagement.Models.Driver", "AssignedDriver")
-                        .WithOne("AssignedTruck")
-                        .HasForeignKey("cManagement.Models.Truck", "AssignedDriverId");
+                        .WithMany()
+                        .HasForeignKey("AssignedDriverId");
 
                     b.Navigation("AssignedDriver");
+                });
+
+            modelBuilder.Entity("cManagement.Data.ApplicationUser", b =>
+                {
+                    b.Navigation("Drivers");
+
+                    b.Navigation("Employees");
+
+                    b.Navigation("Shipments");
                 });
 
             modelBuilder.Entity("cManagement.Models.Department", b =>
@@ -642,8 +699,6 @@ namespace cManagement.Data.Migrations
 
             modelBuilder.Entity("cManagement.Models.Driver", b =>
                 {
-                    b.Navigation("AssignedTruck");
-
                     b.Navigation("DriverShipments");
                 });
 
@@ -651,8 +706,7 @@ namespace cManagement.Data.Migrations
                 {
                     b.Navigation("EmployeeProjects");
 
-                    b.Navigation("EmployeeShipments")
-                        .IsRequired();
+                    b.Navigation("EmployeeShipments");
                 });
 
             modelBuilder.Entity("cManagement.Models.Project", b =>

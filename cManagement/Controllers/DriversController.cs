@@ -12,21 +12,10 @@ namespace cManagement.Controllers
     /// <summary>
     /// API controller for managing truck drivers in the shipment system.
     /// </summary>
-    [Route("api/[controller]")] // Consistent Route: /api/Drivers
+    [Route("api/[controller]")] 
     [ApiController]
-    public class DriversController : ControllerBase
+    public class DriversController(ApplicationDbContext context) : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DriversController"/> class.
-        /// </summary>
-        /// <param name="context">The application's database context.</param>
-        public DriversController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
         /// <summary>
         /// Gets all drivers along with their assigned shipments.
         /// </summary>
@@ -40,11 +29,12 @@ namespace cManagement.Controllers
         {
             try
             {
-                var drivers = await _context.Drivers
+                var drivers = await context.Drivers
                     .Include(d => d.DriverShipments)
-                        .ThenInclude(ds => ds.Shipment)
+                    .ThenInclude(ds => ds.Shipment)
                     .ToListAsync();
 
+                // Using the built-in Ok method from ControllerBase
                 return Ok(drivers);
             }
             catch (System.Exception ex)
@@ -52,11 +42,6 @@ namespace cManagement.Controllers
                 // Log the exception ex
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving drivers: {ex.Message}");
             }
-        }
-
-        private ActionResult<IEnumerable<Driver>> Ok(object value)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -75,9 +60,9 @@ namespace cManagement.Controllers
         {
             try
             {
-                var driver = await _context.Drivers
+                var driver = await context.Drivers
                     .Include(d => d.DriverShipments)
-                        .ThenInclude(ds => ds.Shipment)
+                    .ThenInclude(ds => ds.Shipment)
                     .FirstOrDefaultAsync(d => d.DriverId == id);
 
                 if (driver == null)
@@ -85,17 +70,13 @@ namespace cManagement.Controllers
                     return NotFound($"Driver with ID {id} not found.");
                 }
 
-                return NewMethod(driver);
+                // Using the built-in Ok method from ControllerBase
+                return Ok(driver);
             }
             catch (System.Exception ex)
             {
                 // Log the exception ex
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving driver with ID {id}: {ex.Message}");
-            }
-
-            ActionResult<Driver> NewMethod(Driver driver)
-            {
-                return NewMethod(driver);
             }
         }
 
@@ -128,11 +109,11 @@ namespace cManagement.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Entry(driver).State = EntityState.Modified;
+            context.Entry(driver).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
                 return NoContent();
             }
             catch (DbUpdateConcurrencyException)
@@ -177,8 +158,8 @@ namespace cManagement.Controllers
 
             try
             {
-                _context.Drivers.Add(driver);
-                await _context.SaveChangesAsync();
+                context.Drivers.Add(driver);
+                await context.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetDriver), new { id = driver.DriverId }, driver);
             }
@@ -216,21 +197,20 @@ namespace cManagement.Controllers
         {
             try
             {
-                var driver = await _context.Drivers.FindAsync(id);
+                var driver = await context.Drivers.FindAsync(id);
                 if (driver == null)
                 {
                     return NotFound($"Driver with ID {id} not found.");
                 }
 
-                _context.Drivers.Remove(driver);
-                await _context.SaveChangesAsync();
+                context.Drivers.Remove(driver);
+                await context.SaveChangesAsync();
 
                 return NoContent();
             }
-            catch (DbUpdateException ex) // Catch potential FK constraint errors
+            catch (DbUpdateException ex) 
             {
                 // Log the exception ex
-                // Example: Check if the error is due to related records (e.g., driver assigned to shipments)
                 if (ex.InnerException?.Message?.Contains("FOREIGN KEY constraint failed") == true ||
                     ex.InnerException?.Message?.Contains("Cannot delete or update a parent row: a foreign key constraint fails") == true)
                 {
@@ -247,7 +227,7 @@ namespace cManagement.Controllers
 
         private bool DriverExists(int id)
         {
-            return _context.Drivers.Any(e => e.DriverId == id);
+            return context.Drivers.Any(e => e.DriverId == id);
         }
     }
 }

@@ -9,7 +9,7 @@
         public string Status { get; set; } = string.Empty;
 
         // Foreign key to Truck
-        public int TruckId { get; set; } // Assumed non-nullable based on your Shipment entity
+        public int TruckId { get; set; } 
 
         // New property to include the associated Truck's Model for display
         public string? TruckModel { get; set; }

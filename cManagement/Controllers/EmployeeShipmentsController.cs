@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using cManagement.Data;
 using cManagement.Models;
-using cManagement.Models.Dtos; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskStatus = cManagement.Models.TaskStatus;
@@ -17,11 +16,9 @@ namespace cManagement.Controllers
     {
         private readonly ApplicationDbContext _context = context;
 
-        // DTO for returning detailed employee-shipment assignments.
-        // This is a direct parallel to the provided DriverShipmentDto.
+        // DTO for returning detailed employee-shipment assignments (no single PK).
         public class EmployeeShipmentDto
         {
-            public int? EmployeeShipmentId { get; set; }
             public int EmployeeId { get; set; }
             public string EmployeeFullName { get; set; } = string.Empty;
             public int ShipmentId { get; set; }
@@ -33,10 +30,7 @@ namespace cManagement.Controllers
             public DateTime? CompletedAt { get; set; }
         }
 
-        /// <summary>
-        /// Retrieves a list of all employee-shipment assignments.
-        /// </summary>
-        /// <returns>A list of EmployeeShipmentDto objects.</returns>
+        /// <summary>Retrieves a list of all employee-shipment assignments.</summary>
         [HttpGet("list")]
         public async Task<ActionResult<IEnumerable<EmployeeShipmentDto>>> GetEmployeeShipments()
         {
@@ -47,9 +41,8 @@ namespace cManagement.Controllers
                     .Include(es => es.Shipment)
                     .Select(es => new EmployeeShipmentDto
                     {
-                        EmployeeShipmentId = es.EmployeeShipmentId,
                         EmployeeId = es.EmployeeId,
-                        EmployeeFullName = es.Employee.FullName,
+                        EmployeeFullName = (es.Employee.FirstName + " " + es.Employee.LastName),
                         ShipmentId = es.ShipmentId,
                         ShipmentOrigin = es.Shipment.Origin,
                         ShipmentDestination = es.Shipment.Destination,
@@ -69,36 +62,31 @@ namespace cManagement.Controllers
             }
         }
 
-        /// <summary>
-        /// Retrieves a specific employee-shipment assignment by ID.
-        /// </summary>
-        /// <param name="id">The ID of the assignment.</param>
-        /// <returns>The EmployeeShipmentDto for the specified ID.</returns>
-        [HttpGet("{id}")]
-        public async Task<ActionResult<EmployeeShipmentDto>> GetEmployeeShipment(int id)
+        /// <summary>Retrieves a specific employee-shipment assignment by composite key.</summary>
+        [HttpGet("{employeeId:int}/{shipmentId:int}")]
+        public async Task<ActionResult<EmployeeShipmentDto>> GetEmployeeShipment(int employeeId, int shipmentId)
         {
             try
             {
-                var employeeShipment = await _context.EmployeeShipments
-                    .Include(es => es.Employee)
-                    .Include(es => es.Shipment)
-                    .FirstOrDefaultAsync(es => es.EmployeeShipmentId == id);
+                var es = await _context.EmployeeShipments
+                    .Include(x => x.Employee)
+                    .Include(x => x.Shipment)
+                    .FirstOrDefaultAsync(x => x.EmployeeId == employeeId && x.ShipmentId == shipmentId);
 
-                if (employeeShipment == null)
-                    return NotFound($"Employee-Shipment assignment with ID {id} not found.");
+                if (es == null)
+                    return NotFound($"Employee-Shipment assignment {employeeId}/{shipmentId} not found.");
 
                 var dto = new EmployeeShipmentDto
                 {
-                    EmployeeShipmentId = employeeShipment.EmployeeShipmentId,
-                    EmployeeId = employeeShipment.EmployeeId,
-                    EmployeeFullName = employeeShipment.Employee.FullName,
-                    ShipmentId = employeeShipment.ShipmentId,
-                    ShipmentOrigin = employeeShipment.Shipment.Origin,
-                    ShipmentDestination = employeeShipment.Shipment.Destination,
-                    Role = employeeShipment.Role,
-                    Status = employeeShipment.Status,
-                    AssignedOn = employeeShipment.AssignedOn,
-                    CompletedAt = employeeShipment.CompletedAt
+                    EmployeeId = es.EmployeeId,
+                    EmployeeFullName = (es.Employee.FirstName + " " + es.Employee.LastName),
+                    ShipmentId = es.ShipmentId,
+                    ShipmentOrigin = es.Shipment.Origin,
+                    ShipmentDestination = es.Shipment.Destination,
+                    Role = es.Role,
+                    Status = es.Status,
+                    AssignedOn = es.AssignedOn,
+                    CompletedAt = es.CompletedAt
                 };
 
                 return Ok(dto);
@@ -106,24 +94,29 @@ namespace cManagement.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetEmployeeShipment: {ex.Message}");
-                return StatusCode(500, $"Error retrieving assignment with ID {id}: {ex.Message}");
+                return StatusCode(500, $"Error retrieving assignment {employeeId}/{shipmentId}: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Creates a new employee-shipment assignment.
-        /// </summary>
-        /// <param name="employeeShipmentDto">The DTO containing the assignment data.</param>
-        /// <returns>The newly created EmployeeShipmentDto.</returns>
-        [HttpPost("Create")]
-        public async Task<ActionResult<EmployeeShipmentDto>> PostEmployeeShipment([FromBody] EmployeeShipmentDto employeeShipmentDto)
+        /// <summary>Creates a new employee-shipment assignment.</summary>
+        [HttpPost("create")]
+        public async Task<ActionResult<EmployeeShipmentDto>> PostEmployeeShipment([FromBody] EmployeeShipmentDto dto)
         {
-            employeeShipmentDto.EmployeeShipmentId = null;
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _context.EmployeeShipments.AnyAsync(es => es.EmployeeId == employeeShipmentDto.EmployeeId && es.ShipmentId == employeeShipmentDto.ShipmentId))
+            // Validate FKs and uniqueness for composite key
+            if (!await _context.Employees.AnyAsync(e => e.EmployeeId == dto.EmployeeId))
+            {
+                ModelState.AddModelError(nameof(dto.EmployeeId), "Employee does not exist.");
+                return BadRequest(ModelState);
+            }
+            if (!await _context.Shipments.AnyAsync(s => s.ShipmentId == dto.ShipmentId))
+            {
+                ModelState.AddModelError(nameof(dto.ShipmentId), "Shipment does not exist.");
+                return BadRequest(ModelState);
+            }
+            if (await _context.EmployeeShipments.AnyAsync(es => es.EmployeeId == dto.EmployeeId && es.ShipmentId == dto.ShipmentId))
             {
                 ModelState.AddModelError("", "This employee is already assigned to this shipment.");
                 return BadRequest(ModelState);
@@ -131,32 +124,29 @@ namespace cManagement.Controllers
 
             try
             {
-                var employeeShipment = new EmployeeShipment
+                var entity = new EmployeeShipment
                 {
-                    EmployeeId = employeeShipmentDto.EmployeeId,
-                    ShipmentId = employeeShipmentDto.ShipmentId,
-                    Role = employeeShipmentDto.Role,
-                    Status = employeeShipmentDto.Status,
-                    CompletedAt = employeeShipmentDto.CompletedAt,
-                    AssignedOn = employeeShipmentDto.AssignedOn == default ? DateTime.UtcNow : employeeShipmentDto.AssignedOn
+                    EmployeeId = dto.EmployeeId,
+                    ShipmentId = dto.ShipmentId,
+                    Role = dto.Role,
+                    Status = dto.Status,
+                    CompletedAt = dto.CompletedAt,
+                    AssignedOn = dto.AssignedOn == default ? DateTime.UtcNow : dto.AssignedOn
                 };
 
-                _context.EmployeeShipments.Add(employeeShipment);
+                _context.EmployeeShipments.Add(entity);
                 await _context.SaveChangesAsync();
 
-                var createdDto = await GetEmployeeShipment(employeeShipment.EmployeeShipmentId);
-                if (createdDto.Result is OkObjectResult okResult && okResult.Value is EmployeeShipmentDto populatedDto)
-                {
-                    return CreatedAtAction(nameof(GetEmployeeShipment), new { id = populatedDto.EmployeeShipmentId }, populatedDto);
-                }
-
-                employeeShipmentDto.EmployeeShipmentId = employeeShipment.EmployeeShipmentId;
-                return CreatedAtAction(nameof(GetEmployeeShipment), new { id = employeeShipment.EmployeeShipmentId }, employeeShipmentDto);
+                // Return the fully populated DTO
+                return CreatedAtAction(
+                    nameof(GetEmployeeShipment),
+                    new { employeeId = entity.EmployeeId, shipmentId = entity.ShipmentId },
+                    await BuildDtoAsync(entity.EmployeeId, entity.ShipmentId));
             }
             catch (DbUpdateException ex)
             {
                 Console.WriteLine($"DbUpdateException in PostEmployeeShipment: {ex.Message}");
-                if (ex.InnerException?.Message?.Contains("FOREIGN KEY") == true)
+                if (ex.InnerException?.Message?.Contains("FOREIGN KEY", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     ModelState.AddModelError("", "Invalid EmployeeId or ShipmentId.");
                     return BadRequest(ModelState);
@@ -170,52 +160,41 @@ namespace cManagement.Controllers
             }
         }
 
-        /// <summary>
-        /// Updates an existing employee-shipment assignment.
-        /// </summary>
-        /// <param name="id">The ID of the assignment to update.</param>
-        /// <param name="employeeShipmentDto">The DTO with updated assignment data.</param>
-        /// <returns>NoContent if successful, or an appropriate error response.</returns>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployeeShipment(int id, [FromBody] EmployeeShipmentDto employeeShipmentDto)
+        /// <summary>Updates an existing employee-shipment assignment (keys cannot change).</summary>
+        [HttpPut("{employeeId:int}/{shipmentId:int}")]
+        public async Task<IActionResult> PutEmployeeShipment(int employeeId, int shipmentId, [FromBody] EmployeeShipmentDto dto)
         {
-            if (id != employeeShipmentDto.EmployeeShipmentId)
-                return BadRequest("ID mismatch.");
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var employeeShipment = await _context.EmployeeShipments.FindAsync(id);
-            if (employeeShipment == null)
-                return NotFound($"Assignment with ID {id} not found.");
+            // Enforce keys match route; with composite PK we don't allow changing keys in-place
+            if (dto.EmployeeId != employeeId || dto.ShipmentId != shipmentId)
+                return BadRequest("Composite keys cannot be changed. Delete and recreate the assignment instead.");
 
-            if ((employeeShipment.EmployeeId != employeeShipmentDto.EmployeeId || employeeShipment.ShipmentId != employeeShipmentDto.ShipmentId)
-                && await _context.EmployeeShipments.AnyAsync(es => es.EmployeeId == employeeShipmentDto.EmployeeId && es.ShipmentId == employeeShipmentDto.ShipmentId && es.EmployeeShipmentId != id))
+            var entity = await _context.EmployeeShipments
+                .FirstOrDefaultAsync(es => es.EmployeeId == employeeId && es.ShipmentId == shipmentId);
+
+            if (entity == null)
+                return NotFound($"Assignment {employeeId}/{shipmentId} not found.");
+
+            // Validate FKs (existence)
+            if (!await _context.Employees.AnyAsync(e => e.EmployeeId == dto.EmployeeId))
             {
-                ModelState.AddModelError("", "Assignment already exists with this EmployeeId and ShipmentId.");
+                ModelState.AddModelError(nameof(dto.EmployeeId), "Employee does not exist.");
+                return BadRequest(ModelState);
+            }
+            if (!await _context.Shipments.AnyAsync(s => s.ShipmentId == dto.ShipmentId))
+            {
+                ModelState.AddModelError(nameof(dto.ShipmentId), "Shipment does not exist.");
                 return BadRequest(ModelState);
             }
 
-            if (!await _context.Employees.AnyAsync(e => e.EmployeeId == employeeShipmentDto.EmployeeId))
-            {
-                ModelState.AddModelError(nameof(employeeShipmentDto.EmployeeId), "Employee does not exist.");
-                return BadRequest(ModelState);
-            }
+            entity.Role = dto.Role;
+            entity.Status = dto.Status;
+            entity.CompletedAt = dto.CompletedAt;
+            entity.AssignedOn = dto.AssignedOn;
 
-            if (!await _context.Shipments.AnyAsync(s => s.ShipmentId == employeeShipmentDto.ShipmentId))
-            {
-                ModelState.AddModelError(nameof(employeeShipmentDto.ShipmentId), "Shipment does not exist.");
-                return BadRequest(ModelState);
-            }
-
-            employeeShipment.EmployeeId = employeeShipmentDto.EmployeeId;
-            employeeShipment.ShipmentId = employeeShipmentDto.ShipmentId;
-            employeeShipment.Role = employeeShipmentDto.Role;
-            employeeShipment.Status = employeeShipmentDto.Status;
-            employeeShipment.CompletedAt = employeeShipmentDto.CompletedAt;
-            employeeShipment.AssignedOn = employeeShipmentDto.AssignedOn;
-
-            _context.Entry(employeeShipment).State = EntityState.Modified;
+            _context.Entry(entity).State = EntityState.Modified;
 
             try
             {
@@ -224,7 +203,7 @@ namespace cManagement.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!EmployeeShipmentExists(id))
+                if (!EmployeeShipmentExists(employeeId, shipmentId))
                     return NotFound();
                 throw;
             }
@@ -235,21 +214,19 @@ namespace cManagement.Controllers
             }
         }
 
-        /// <summary>
-        /// Deletes an employee-shipment assignment by ID.
-        /// </summary>
-        /// <param name="id">The ID of the assignment to delete.</param>
-        /// <returns>NoContent if successful, or an appropriate error response.</returns>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployeeShipment(int id)
+        /// <summary>Deletes an employee-shipment assignment by composite key.</summary>
+        [HttpDelete("{employeeId:int}/{shipmentId:int}")]
+        public async Task<IActionResult> DeleteEmployeeShipment(int employeeId, int shipmentId)
         {
             try
             {
-                var employeeShipment = await _context.EmployeeShipments.FindAsync(id);
-                if (employeeShipment == null)
-                    return NotFound($"Assignment with ID {id} not found.");
+                var entity = await _context.EmployeeShipments
+                    .FirstOrDefaultAsync(es => es.EmployeeId == employeeId && es.ShipmentId == shipmentId);
 
-                _context.EmployeeShipments.Remove(employeeShipment);
+                if (entity == null)
+                    return NotFound($"Assignment {employeeId}/{shipmentId} not found.");
+
+                _context.EmployeeShipments.Remove(entity);
                 await _context.SaveChangesAsync();
 
                 return NoContent();
@@ -261,9 +238,29 @@ namespace cManagement.Controllers
             }
         }
 
-        private bool EmployeeShipmentExists(int id)
+        // Helpers
+        private bool EmployeeShipmentExists(int employeeId, int shipmentId) =>
+            _context.EmployeeShipments.Any(e => e.EmployeeId == employeeId && e.ShipmentId == shipmentId);
+
+        private async Task<EmployeeShipmentDto> BuildDtoAsync(int employeeId, int shipmentId)
         {
-            return _context.EmployeeShipments.Any(e => e.EmployeeShipmentId == id);
+            var es = await _context.EmployeeShipments
+                .Include(x => x.Employee)
+                .Include(x => x.Shipment)
+                .FirstAsync(x => x.EmployeeId == employeeId && x.ShipmentId == shipmentId);
+
+            return new EmployeeShipmentDto
+            {
+                EmployeeId = es.EmployeeId,
+                EmployeeFullName = (es.Employee.FirstName + " " + es.Employee.LastName),
+                ShipmentId = es.ShipmentId,
+                ShipmentOrigin = es.Shipment.Origin,
+                ShipmentDestination = es.Shipment.Destination,
+                Role = es.Role,
+                Status = es.Status,
+                AssignedOn = es.AssignedOn,
+                CompletedAt = es.CompletedAt
+            };
         }
     }
 }

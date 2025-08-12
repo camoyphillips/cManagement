@@ -4,12 +4,13 @@ using System.ComponentModel.DataAnnotations;
 namespace cManagement.Models
 {
     /// <summary>
-    /// Join table between Driver and Shipment, with metadata about the assignment.
+    /// Driver ↔ Shipment assignment with metadata about the assignment.
+    /// Your table includes DriverShipmentId as a separate key (not identity).
     /// </summary>
     public class DriverShipment
     {
         [Key]
-        public int DriverShipmentId { get; set; }
+        public int DriverShipmentId { get; set; }  // ValueGeneratedNever() in DbContext
 
         public int DriverId { get; set; }
         public Driver Driver { get; set; } = null!;
@@ -18,7 +19,7 @@ namespace cManagement.Models
         public Shipment Shipment { get; set; } = null!;
 
         [StringLength(50)]
-        public string? Role { get; set; } 
+        public string? Role { get; set; }
 
         public DateTime AssignedOn { get; set; } = DateTime.UtcNow;
     }

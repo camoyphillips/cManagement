@@ -13,7 +13,7 @@ namespace cManagement.Models.Dtos
         /// Gets or sets the unique identifier for the driver-shipment assignment.
         /// Nullable for new assignments (ID will be generated), required for updates/retrievals.
         /// </summary>
-        public int? DriverShipmentId { get; set; } // Now includes the ID
+        public int? DriverShipmentId { get; set; } 
 
         /// <summary>
         /// Gets or sets the ID of the assigned driver.
@@ -38,7 +38,6 @@ namespace cManagement.Models.Dtos
         /// </summary>
         public DateTime AssignedOn { get; set; }
 
-        // --- Properties for displaying related data (read-only) ---
 
         /// <summary>
         /// Gets or sets the name of the assigned driver.

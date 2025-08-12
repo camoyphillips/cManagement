@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,7 +24,7 @@ namespace cManagement.Models
         [Required, StringLength(50)]
         public string Status { get; set; } = "Pending";
 
-        [ForeignKey("Truck")]
+        [ForeignKey(nameof(Truck))]
         public int TruckId { get; set; }
         public Truck Truck { get; set; } = null!;
 

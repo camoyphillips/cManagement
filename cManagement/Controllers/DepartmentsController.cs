@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace cManagement.Controllers
 {
-    // This controller handles department pages (list, create, edit, delete)
+    // This controller handles department pages
     public class DepartmentsController : Controller
     {
         // Service used to work with department data

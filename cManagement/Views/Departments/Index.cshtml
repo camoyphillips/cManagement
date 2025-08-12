@@ -38,6 +38,7 @@
                     <td>@department.DepartmentId</td>
                     <td>@department.DepartmentName</td>
                     <td>
+                            <a class="btn btn-sm btn-warning" asp-controller="Departments" asp-action="List" asp-route-id="@department.DepartmentId">List</a>
                         <a class="btn btn-sm btn-warning" asp-controller="Departments" asp-action="Edit" asp-route-id="@department.DepartmentId">Edit</a>
 <a class="btn btn-sm btn-danger" asp-controller="Departments" asp-action="Delete" asp-route-id="@department.DepartmentId">Delete</a>
                     </td>

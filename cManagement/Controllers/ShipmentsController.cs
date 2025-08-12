@@ -13,7 +13,7 @@ namespace cManagement.Controllers
     /// API controller for managing shipment records.
     /// Supports CRUD operations and relationship navigation.
     /// </summary>
-    [Route("api/[controller]")] // Consistent Route: /api/Shipments
+    [Route("api/[controller]")] 
     [ApiController]
     public class ShipmentsController : ControllerBase
     {

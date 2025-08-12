@@ -1,7 +1,7 @@
 using cManagement.Data;
 using cManagement.DTOs;
 using cManagement.Models;
-using cManagement.Services.Interfaces; // Assuming IDepartmentService is in cManagement.Services.Interfaces
+using cManagement.Services.Interfaces; 
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace cManagement.Services.Implementations
     public class DepartmentService
 : IDepartmentService
     {
-        private readonly ApplicationDbContext _context; // Renamed _context to dbContext to match style
+        private readonly ApplicationDbContext _context; 
 
         // Constructor that receives the database context
         public DepartmentService(ApplicationDbContext context)

@@ -36,7 +36,6 @@ namespace cManagement.Services
 
         public async Task<ShipmentDto?> FindShipment(int id)
         {
-            // Include Truck if you need its model when finding a single shipment
             var shipment = await _context.Shipments
                                          .Include(s => s.Truck)
                                          .FirstOrDefaultAsync(s => s.ShipmentId == id);

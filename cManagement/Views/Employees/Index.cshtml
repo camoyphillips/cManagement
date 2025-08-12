@@ -44,6 +44,7 @@
                     <td>@employee.Email</td>
                     <td>@employee.DepartmentId</td>
                     <td>
+                            <a class="btn btn-sm btn-warning" asp-controller="Employee" asp-action="List" asp-route-id="@employee.EmployeeId">List</a>
                         <a class="btn btn-sm btn-info text-white" asp-controller="Employees" asp-action="Details" asp-route-id="@employee.EmployeeId">Details</a>
                         <a class="btn btn-sm btn-warning" asp-controller="Employees" asp-action="Edit" asp-route-id="@employee.EmployeeId">Edit</a>
                         <a class="btn btn-sm btn-danger" asp-controller="Employees" asp-action="Delete" asp-route-id="@employee.EmployeeId">Delete</a>

@@ -10,7 +10,7 @@ namespace cManagement.Models.ViewModels
     public class DepartmentDetailVM
     {
         public DepartmentDto Department { get; set; } = null!;
-        public List<EmployeeDto> Employees { get; set; } = new();
+        public List<EmployeeDTO> Employees { get; set; } = new();
         public int TotalEmployees => Employees.Count;
 
         // Add metrics here
