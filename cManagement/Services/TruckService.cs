@@ -15,37 +15,59 @@ namespace cManagement.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<TruckDto>> ListTrucks()
+        public async Task<int> CountTrucks()
         {
-            return await _context.Trucks
-                .Select(t => new TruckDto 
+            return await _context.Trucks.CountAsync();
+        }
+
+        public async Task<IEnumerable<TruckDto>> ListTrucks(int skip, int take)
+        {
+            // Order by key for stable paging
+            var items = await _context.Trucks
+                .Include(t => t.AssignedDriver)
+                .OrderBy(t => t.TruckId)
+                .Skip(skip)
+                .Take(take)
+                .Select(t => new TruckDto
                 {
                     TruckId = t.TruckId,
                     Model = t.Model,
                     Mileage = (int)t.Mileage,
                     LastMaintenanceDate = t.LastMaintenanceDate,
-                    AssignedDriverId = t.AssignedDriverId, 
+                    AssignedDriverId = t.AssignedDriverId,
                     AssignedDriverName = t.AssignedDriver != null ? t.AssignedDriver.Name : string.Empty,
-                    TruckImagePath = t.TruckImagePath 
+                    // normalize image path + has flag
+                    HasTruckImage = !string.IsNullOrWhiteSpace(t.TruckImagePath),
+                    TruckImagePath = !string.IsNullOrWhiteSpace(t.TruckImagePath)
+                        ? t.TruckImagePath!
+                        : "/images/trucks/default.jpg"
                 })
                 .ToListAsync();
+
+            return items;
         }
 
+        // Update FindTruck() mapping to set HasTruckImage and default path
         public async Task<TruckDto?> FindTruck(int id)
         {
             var truck = await _context.Trucks
                 .Include(t => t.AssignedDriver)
                 .FirstOrDefaultAsync(t => t.TruckId == id);
 
-            return truck == null ? null : new TruckDto
+            if (truck == null) return null;
+
+            var has = !string.IsNullOrWhiteSpace(truck.TruckImagePath);
+
+            return new TruckDto
             {
                 TruckId = truck.TruckId,
                 Model = truck.Model,
                 Mileage = (int)truck.Mileage,
                 LastMaintenanceDate = truck.LastMaintenanceDate,
-                AssignedDriverId = truck.AssignedDriverId, 
+                AssignedDriverId = truck.AssignedDriverId,
                 AssignedDriverName = truck.AssignedDriver != null ? truck.AssignedDriver.Name : string.Empty,
-                TruckImagePath = truck.TruckImagePath 
+                HasTruckImage = has,
+                TruckImagePath = has ? truck.TruckImagePath! : "/images/trucks/default.jpg"
             };
         }
 

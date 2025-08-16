@@ -11,6 +11,7 @@
         public string? AssignedDriverName { get; set; }
 
         public string? TruckImagePath { get; set; }
-        public bool HasTruckImage => !string.IsNullOrWhiteSpace(TruckImagePath);
+
+        public bool HasTruckImage { get; set; }
     }
 }

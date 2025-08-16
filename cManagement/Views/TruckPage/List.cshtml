@@ -1,21 +1,53 @@
-﻿@model IEnumerable<cManagement.Models.Dtos.TruckDto>
-
+﻿@model cManagement.Models.ViewModels.TruckList
 
 <div class="d-flex justify-content-start mb-3">
-    <a href="/TruckPage/New/"  class="btn btn-primary me-2">New</a>
+    @if (Model.IsAdmin)
+    {
+        <a href="/TruckPage/New" class="btn btn-primary me-2">New</a>
+    }
     <a href="/TruckPage/List" class="btn btn-secondary">Back to List</a>
 </div>
 
+<div style="margin-bottom:20px;">
+    @if (Model.MaxPage >= 0)
+    {
+        var prevPage = Model.Page - 1;
+        var nextPage = Model.Page + 1;
 
+        if (Model.Page > 0)
+        {
+            <a href="/TruckPage/List?PageNum=@prevPage">&laquo; Prev</a>
+        }
+        else
+        {
+            <span class="text-muted">&laquo; Prev</span>
+        }
+
+        <span class="mx-2">Page @(Model.Page + 1) of @(Model.MaxPage + 1)</span>
+
+        if (Model.Page < Model.MaxPage)
+        {
+            <a href="/TruckPage/List?PageNum=@nextPage">Next &raquo;</a>
+        }
+        else
+        {
+            <span class="text-muted">Next &raquo;</span>
+        }
+    }
+</div>
 
 <div class="row">
-    @foreach (var truck in Model)
+    @foreach (var truck in Model.Trucks)
     {
         <div>
             <a href="/TruckPage/Details/@truck.TruckId">
                 @if (truck.HasTruckImage)
                 {
-                    <img style="width:150px; height:auto;" src="@truck.TruckImagePath" />
+                    <img style="width:150px; height:auto;" src="@truck.TruckImagePath" alt="@truck.Model" />
+                }
+                else
+                {
+                    <img style="width:150px; height:auto;" src="/images/trucks/default.jpg" alt="@truck.Model" />
                 }
                 <span>@truck.Model - Mileage: @truck.Mileage km</span>
             </a>

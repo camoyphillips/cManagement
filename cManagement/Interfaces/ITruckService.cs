@@ -7,11 +7,12 @@ namespace cManagement.Interfaces
 {
     public interface ITruckService
     {
-        Task<IEnumerable<TruckDto>> ListTrucks();
+        Task<IEnumerable<TruckDto>> ListTrucks(int skip, int pageSize);
         Task<TruckDto?> FindTruck(int id); 
         Task<ServiceResponse> AddTruck(TruckDto dto);
         Task<ServiceResponse> UpdateTruck(TruckDto dto);
         Task<ServiceResponse> DeleteTruck(int id);
+        Task<int> CountTrucks();
         Task<IEnumerable<ShipmentDto>> ListShipmentsForTruck(int truckId);
 
      

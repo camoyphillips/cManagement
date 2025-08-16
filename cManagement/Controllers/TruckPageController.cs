@@ -19,15 +19,10 @@ namespace cManagement.Controllers
     /// including listing, viewing details, adding, editing, and deleting trucks.
     /// It interacts with service layers for data operations.
     /// </summary>
-    public class TruckPageController(ITruckService truckService) : Controller 
+    public class TruckPageController(ITruckService truckService) : Controller
     {
-        private readonly ITruckService _truckService = truckService;
-
-        // IDriverService was previously here but removed based on a recent request for a
-        // simplified Details method.
-        // If you need it for other actions (e.g., assigning a driver during New/Edit), you'll need to
-        // re-add it
-        // both to the constructor and as a private readonly field.
+        // The primary constructor automatically creates a private field.
+        // private readonly ITruckService _truckService = truckService;
 
         /// <summary>
         /// Redirects the base URL for TruckPage to the List action.
@@ -43,19 +38,29 @@ namespace cManagement.Controllers
         /// </summary>
         /// <returns>A View containing a collection of Truck DTOs.</returns>
         // GET: TruckPage/List
-        public async Task<IActionResult> List()
+        // GET: /TruckPage/List?PageNum=0
+        public async Task<IActionResult> List(int PageNum = 0, int pageSize = 12)
         {
-            try
+            if (pageSize <= 0) pageSize = 12;
+
+            var total = await truckService.CountTrucks();
+            var maxPage = total == 0 ? 0 : Math.Max(0, (int)Math.Ceiling(total / (double)pageSize) - 1);
+
+            // clamp page
+            var page = Math.Max(0, Math.Min(PageNum, maxPage));
+            var skip = page * pageSize;
+
+            var list = await truckService.ListTrucks(skip, pageSize);
+
+            var vm = new TruckList
             {
-                var trucks = await _truckService.ListTrucks();
-                return View(trucks);
-            }
-            catch (Exception ex)
-            {
-                // TODO: Log the exception (e.g., using an injected ILogger)
-                // Console.WriteLine($"Error retrieving truck list: {ex.Message}");
-                return View("Error", new ErrorViewModel { Messages = { "An error occurred while loading the truck list.", ex.Message } }); // Simplified collection initialization
-            }
+                Trucks = list,
+                IsAdmin = User.IsInRole("Admin"),
+                Page = page,
+                MaxPage = maxPage
+            };
+
+            return View(vm); // Views/TruckPage/List.cshtml
         }
 
         /// <summary>
@@ -70,13 +75,13 @@ namespace cManagement.Controllers
         {
             try
             {
-                var truck = await _truckService.FindTruck(id);
+                var truck = await truckService.FindTruck(id);
                 if (truck == null)
                 {
                     // If truck not found, return an error view with a specific message
                     return View("Error", new ErrorViewModel
                     {
-                        Messages = { $"Truck with ID {id} not found." } 
+                        Messages = { $"Truck with ID {id} not found." }
                     });
                 }
 
@@ -112,12 +117,12 @@ namespace cManagement.Controllers
             if (!ModelState.IsValid)
             {
                 // If model validation fails, return the view with validation errors
-                return View("New", truckDto); 
+                return View("New", truckDto);
             }
 
             try
             {
-                var response = await _truckService.AddTruck(truckDto);
+                var response = await truckService.AddTruck(truckDto); 
                 if (response.Status == ServiceResponse.ServiceStatus.Created && response.CreatedId.HasValue)
                 {
                     TempData["SuccessMessage"] = "Truck added successfully!";
@@ -145,7 +150,7 @@ namespace cManagement.Controllers
         {
             try
             {
-                var truck = await _truckService.FindTruck(id);
+                var truck = await truckService.FindTruck(id); // Corrected variable name
                 // If truck is null, return an error view; otherwise, return the edit view with the truck data
                 return truck == null ? View("Error", new ErrorViewModel { Messages = { $"Truck with ID {id} not found for editing." } }) : View(truck); // Simplified collection initialization
             }
@@ -208,7 +213,7 @@ namespace cManagement.Controllers
                     truckDto.TruckImagePath = $"/uploads/trucks/{fileName}";
                 }
 
-                var response = await _truckService.UpdateTruck(truckDto);
+                var response = await truckService.UpdateTruck(truckDto); // Corrected variable name
 
                 if (response.Status == ServiceResponse.ServiceStatus.Updated)
                 {
@@ -216,7 +221,7 @@ namespace cManagement.Controllers
                     // Redirect to the Details page of the updated truck
                     return RedirectToAction("Details", new { id = truckDto.TruckId });
                 }
-                // If update failed (e.g., NotFound from service, or other service-level error)
+                // If update failed
                 return View("Error", new ErrorViewModel { Messages = response.Messages });
             }
             catch (Exception ex)
@@ -237,7 +242,7 @@ namespace cManagement.Controllers
         {
             try
             {
-                var truck = await _truckService.FindTruck(id);
+                var truck = await truckService.FindTruck(id);
                 // If truck is null, return an error view; otherwise, return the truck for confirmation
                 return truck == null ? View("Error", new ErrorViewModel { Messages = { $"Truck with ID {id} not found for deletion confirmation." } }) : View(truck); // Simplified collection initialization
             }
@@ -261,14 +266,14 @@ namespace cManagement.Controllers
         {
             try
             {
-                var response = await _truckService.DeleteTruck(id);
+                var response = await truckService.DeleteTruck(id);
                 if (response.Status == ServiceResponse.ServiceStatus.Deleted)
                 {
                     TempData["SuccessMessage"] = "Truck deleted successfully!";
                     // Redirect to the list of trucks after successful deletion
                     return RedirectToAction("List");
                 }
-                // If deletion failed (e.g., NotFound from service, or other service-level error)
+                // If deletion failed
                 return View("Error", new ErrorViewModel { Messages = response.Messages });
             }
             catch (Exception ex)
