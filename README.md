@@ -1,88 +1,60 @@
-# cManagement
+cManagement
+cManagement is a modular ASP.NET Core Web Application built to streamline logistics and internal resource management across Drivers, Trucks, Shipments, Employees, Projects, and Departments.
+The application follows a clean domain-driven architecture, integrates CI/CD with GitHub Actions, and uses Entity Framework Core with SQL Server for a scalable backend.
 
-**cManagement** is a modular ASP.NET Core Web Application built to streamline logistics and internal resource management across Drivers, Trucks, Shipments, Employees, Projects, and Departments.
-
-The application is designed with a clean domain-driven structure, integrated CI/CD, and a scalable backend using Entity Framework Core and SQL Server.
-
----
-
-## MVP Development Goals
-
-The following core goals were established and implemented based on team feedback and milestone reviews:
-
-### Full CRUD for All Base Entities
-
-- **cShipment**: Drivers, Trucks, Shipments  
-- **EPMS**: Departments, Employees, Projects  
-
-### New Relationships
-
-- `EmployeeShipment` – a many-to-many join linking Employees to Shipments  
-- Additional join models: `DriverShipment`, `EmployeeProject`
-
-### RESTful WebAPI Endpoints
-
-```http
+MVP Development Goals
+The following core goals were implemented based on milestone reviews and team feedback:
+Full CRUD for All Base Entities
+•	cShipment Module: Drivers, Trucks, Shipments
+•	EPMS Module: Departments, Employees, Projects
+New Relationships
+•	EmployeeShipment – many-to-many join between Employees and Shipments
+•	DriverShipment – many-to-many join between Drivers and Shipments
+•	EmployeeProject – many-to-many join between Employees and Projects
+RESTful Web API Endpoints
 GET    /api/employees/shipments
 POST   /api/shipments/{id}/assign-employee
 DELETE /api/shipments/{id}/remove-employee
+Additional API Features:
+•	List all entities
+•	Get by ID
+•	Create
+•	Update
+•	Delete
+•	Get associated entities
+•	Add/remove associations
 
-
-Our project also includes:
-
-List all
-
-Get by ID
-
-Create
-
-Update
-
-Delete
-
-Get associated entities
-
-Add/remove associations
-
- Razor Views + ViewModels
-ShipmentDetailVM: displays Shipment + Assigned Truck + Employees
-
-EmployeeDetailVM: displays Employee + Assigned Projects + Shipments
-
-ProjectDetailVM: displays Project + Employees
-
-Input Validation & UX Feedback
-Server-side ModelState.IsValid checks
-
-TempData success/error messages for all form submissions
+Razor Views + ViewModels
+•	ShipmentDetailVM – Shipment + Assigned Truck + Employees
+•	EmployeeDetailVM – Employee + Assigned Projects + Shipments
+•	ProjectDetailVM – Project + Assigned Employees
 
 Core Modules
 Entity	Description
-Drivers	Manage driver profiles and their assigned shipments
-Trucks	Maintain truck fleet information
-Shipments	Track logistics operations from origin to destination
-Employees	Internal staff managing operations and project participation
-Projects	Company-wide initiatives managed and executed by employees
-Departments	Department-level organization of employees and resources
-
-
+Drivers	Manage driver profiles and assigned shipments
+Trucks	Maintain truck fleet details
+Shipments	Track logistics from origin to destination
+Employees	Manage internal staff, roles, and assignments
+Projects	Manage company initiatives and team members
+Departments	Organize employees by department
+Project Structure
 cManagement.sln
 │
-├── cManagement/                      
-│   ├── Controllers/                    
+├── cManagement/
+│   ├── Controllers/
 │   │   ├── DriversController.cs
 │   │   ├── TrucksController.cs
 │   │   ├── ShipmentsController.cs
 │   │   ├── EmployeesController.cs
 │   │   ├── ProjectsController.cs
 │   │   ├── DepartmentsController.cs
-│   │   └── HomeController.cs
+│   │   
 │   │
-│   ├── Data/                        
+│   ├── Data/
 │   │   ├── ApplicationDbContext.cs
 │   │   └── DbInitializer.cs
 │   │
-│   ├── Interfaces/                    
+│   ├── Interfaces/
 │   │   ├── IDriverService.cs
 │   │   ├── ITruckService.cs
 │   │   ├── IShipmentService.cs
@@ -90,7 +62,7 @@ cManagement.sln
 │   │   ├── IProjectService.cs
 │   │   └── IDepartmentService.cs
 │   │
-│   ├── Models/                         
+│   ├── Models/
 │   │   ├── Driver.cs
 │   │   ├── Truck.cs
 │   │   ├── Shipment.cs
@@ -101,18 +73,21 @@ cManagement.sln
 │   │   ├── EmployeeProject.cs
 │   │   └── EmployeeShipment.cs
 │   │
-│   ├── Models/Dtos/                   
+│   ├── Models/Dtos/
 │   │   ├── DriverDto.cs
+│   │   ├── TruckDto.cs
 │   │   ├── ShipmentDto.cs
 │   │   ├── EmployeeDto.cs
-│   │   └── AssignmentRequestDto.cs
+│   │   ├── ProjectDto.cs
+│   │   
 │   │
-│   ├── Models/ViewModels/          
+│   ├── Models/ViewModels/
 │   │   ├── ShipmentDetailVM.cs
 │   │   ├── EmployeeDetailVM.cs
-│   │   └── ProjectDetailVM.cs
+│   │   ├── ProjectDetailVM.cs
+│   │   └── TruckList.cs
 │   │
-│   ├── Services/                     
+│   ├── Services/
 │   │   ├── DriverService.cs
 │   │   ├── TruckService.cs
 │   │   ├── ShipmentService.cs
@@ -120,40 +95,41 @@ cManagement.sln
 │   │   ├── ProjectService.cs
 │   │   └── DepartmentService.cs
 │   │
-│   ├── Views/                         
+│   ├── Views/
 │   │   ├── Shared/
 │   │   ├── Home/
 │   │   ├── Shipments/
 │   │   ├── Employees/
 │   │   ├── Drivers/
-│   │   └── Projects/
+│   │   ├── Projects/
+│   │   ├── Departments/
+│   │   └── TruckPage/
 │   │
-│   ├── wwwroot/                       
+│   ├── wwwroot/
 │   ├── appsettings.json
 │   ├── Program.cs
+│
 ├── .github/
 │   └── workflows/
-│       └── dotnet-ci.yml             
+│       └── dotnet-ci.yml
 │
 └── README.md
 
+Technology Stack
+•	Framework: ASP.NET Core 8.0 MVC 
+•	Database: SQL Server + EF Core (Code-First)
+•	Frontend: Razor Views
+•	CI/CD: GitHub Actions 
+•	Patterns: Dependency Injection
+•	Validation: Data Annotations 
+•	Version Control: Git + GitHub
+
  Project Status
-All base features implemented and verified:
-
- Code-first models and migrations
-
- Web API + MVC integration
-
- Full CRUD with EF Core
-
- Data annotations for validation
-
- Relationship management and dropdowns
-
- GitHub CI workflow with dotnet build and dotnet test
-
- ViewModels for clear UI rendering
-
- Team feedback from Project Plan fully incorporated
-
-Next: Begin implementing extra features like authentication, reporting, or real-time tracking.
+ Features implemented and verified:
+•	Code-first models + migrations
+•	Web API + MVC integration
+•	Full CRUD for all entities
+•	Validation with data annotations
+•	Many-to-many relationship management
+•	ViewModels for clean UI rendering
+•	CI/CD pipeline active and passing
