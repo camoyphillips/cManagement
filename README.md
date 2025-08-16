@@ -1,20 +1,28 @@
-cManagement
-cManagement is a modular ASP.NET Core Web Application built to streamline logistics and internal resource management across Drivers, Trucks, Shipments, Employees, Projects, and Departments.
-The application follows a clean domain-driven architecture, integrates CI/CD with GitHub Actions, and uses Entity Framework Core with SQL Server for a scalable backend.
+# cManagement
 
-MVP Development Goals
+**cManagement** is a modular **ASP.NET Core Web Application** built to streamline logistics and internal resource management across **Drivers**, **Trucks**, **Shipments**, **Employees**, **Projects**, and **Departments**.  
+The application follows a **clean domain-driven architecture**, integrates **CI/CD with GitHub Actions**, and uses **Entity Framework Core with SQL Server** for a scalable backend.
+
+
+## MVP Development Goals
+
 The following core goals were implemented based on milestone reviews and team feedback:
-Full CRUD for All Base Entities
-•	cShipment Module: Drivers, Trucks, Shipments
-•	EPMS Module: Departments, Employees, Projects
-New Relationships
-•	EmployeeShipment – many-to-many join between Employees and Shipments
-•	DriverShipment – many-to-many join between Drivers and Shipments
-•	EmployeeProject – many-to-many join between Employees and Projects
-RESTful Web API Endpoints
+
+### Full CRUD for All Base Entities
+- **cShipment Module:** Drivers, Trucks, Shipments
+- **EPMS Module:** Departments, Employees, Projects
+
+### New Relationships
+- `EmployeeShipment` – many-to-many join between Employees and Shipments
+- `DriverShipment` – many-to-many join between Drivers and Shipments
+- `EmployeeProject` – many-to-many join between Employees and Projects
+
+### RESTful Web API Endpoints
+```http
 GET    /api/employees/shipments
 POST   /api/shipments/{id}/assign-employee
 DELETE /api/shipments/{id}/remove-employee
+
 Additional API Features:
 •	List all entities
 •	Get by ID
